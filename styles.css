@@ -264,6 +264,72 @@ h1 span {
   flex-wrap: wrap;
 }
 
+.hero-event-poster {
+  margin-top: 1.25rem;
+  padding: 1rem 1rem 1.1rem;
+  border-radius: 18px;
+  border: 1px solid rgba(213, 161, 69, 0.55);
+  background:
+    linear-gradient(180deg, rgba(14, 16, 24, 0.88), rgba(10, 12, 18, 0.76)),
+    radial-gradient(circle at top right, rgba(243, 205, 123, 0.18), transparent 38%);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.42);
+}
+
+.hero-event-label {
+  margin: 0;
+  font-family: Impact, Haettenschweiler, "Franklin Gothic Bold", sans-serif;
+  letter-spacing: 0.12em;
+  color: var(--gold-bright);
+  font-size: 1.1rem;
+}
+
+.hero-event-poster h2 {
+  margin-top: 0.35rem;
+  font-size: clamp(1.6rem, 4vw, 2.45rem);
+  line-height: 0.96;
+  text-transform: uppercase;
+}
+
+.hero-event-date,
+.hero-event-location {
+  margin: 0.5rem 0 0;
+  color: var(--cream);
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.hero-event-location {
+  color: var(--gold-bright);
+}
+
+.hero-event-grid {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 1rem;
+}
+
+.hero-event-grid div {
+  padding: 0.85rem;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.hero-event-grid strong {
+  display: block;
+  margin-bottom: 0.35rem;
+  color: var(--gold-bright);
+  font-size: 0.96rem;
+}
+
+.hero-event-grid p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.45;
+  font-size: 0.92rem;
+}
+
 .hero-card h2 {
   font-size: clamp(1.65rem, 4vw, 2.5rem);
   text-transform: uppercase;
