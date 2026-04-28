@@ -8,6 +8,7 @@
   --muted: #b5bdca;
   --line: rgba(255, 255, 255, 0.14);
   --shadow: 0 20px 70px rgba(0, 0, 0, 0.4);
+  --page-background-image: none;
   --cover-image: none;
   --collage-image: none;
   --bulb-image: none;
@@ -36,6 +37,15 @@ body {
     radial-gradient(circle at 88% 24%, rgba(243, 205, 123, 0.15), transparent 42%),
     linear-gradient(140deg, #080b13 0%, #0f1524 48%, #111b2f 100%);
   min-height: 100vh;
+}
+
+body.page-request-service {
+  background:
+    linear-gradient(180deg, rgba(7, 9, 16, 0.84), rgba(7, 9, 16, 0.84)),
+    var(--page-background-image) center center / cover fixed no-repeat,
+    radial-gradient(circle at 10% 10%, rgba(213, 161, 69, 0.22), transparent 35%),
+    radial-gradient(circle at 88% 24%, rgba(243, 205, 123, 0.15), transparent 42%),
+    linear-gradient(140deg, #080b13 0%, #0f1524 48%, #111b2f 100%);
 }
 
 .bg-noise {

@@ -187,6 +187,12 @@ const findFirstAvailableImage = async (paths) => {
 };
 
 const initializeImageSources = async () => {
+  const pageBackgroundCandidates = [
+    'assets/whatsapp-background.jpg',
+    'assets/whatsapp-background.jpeg',
+    'assets/whatsapp-background.png',
+  ];
+
   const coverCandidates = [
     'assets/cover-page.jpg',
     'assets/cover-page.jpeg',
@@ -251,7 +257,8 @@ const initializeImageSources = async () => {
     'assets/decorative-bulbs.png',
   ];
 
-  const [coverImage, collageImage, bulbImage, wallImage, ceilingImage, pendantImage, outdoorImage, decorImage] = await Promise.all([
+  const [pageBackgroundImage, coverImage, collageImage, bulbImage, wallImage, ceilingImage, pendantImage, outdoorImage, decorImage] = await Promise.all([
+    findFirstAvailableImage(pageBackgroundCandidates),
     findFirstAvailableImage(coverCandidates),
     findFirstAvailableImage(collageCandidates),
     findFirstAvailableImage(bulbCandidates),
@@ -262,8 +269,13 @@ const initializeImageSources = async () => {
     findFirstAvailableImage(decorCandidates),
   ]);
 
+  const resolvedPageBackgroundImage = pageBackgroundImage || collageImage || bulbImage;
   const resolvedCoverImage = coverImage || bulbImage;
   const resolvedCollageImage = collageImage || bulbImage;
+
+  if (resolvedPageBackgroundImage) {
+    document.documentElement.style.setProperty('--page-background-image', `url("${resolvedPageBackgroundImage}")`);
+  }
 
   if (resolvedCoverImage) {
     document.documentElement.style.setProperty('--cover-image', `url("${resolvedCoverImage}")`);
