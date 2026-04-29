@@ -1017,6 +1017,10 @@ textarea {
     justify-self: end;
   }
 
+  .site-header > div[style*="display: flex"] .btn-outline {
+    display: none;
+  }
+
   .top-nav {
     display: none;
   }
@@ -1125,6 +1129,10 @@ textarea {
 
   .site-header > div[style*="display: flex"] {
     justify-self: end;
+  }
+
+  .site-header > div[style*="display: flex"] .btn-outline {
+    display: none;
   }
 
   .floating-cta {
