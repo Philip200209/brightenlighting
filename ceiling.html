@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ceiling Lights Collection | Brighten Lighting</title>
+    <meta name="description" content="Shop ceiling lights with filters, sorting, and quick add-to-cart." />
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      .collection-wrap { display:grid; grid-template-columns:260px 1fr; gap:1rem; }
+      .filters-panel,.products-panel { border:1px solid var(--line); border-radius:16px; background:linear-gradient(160deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02)); }
+      .filters-panel { padding:1rem; height:fit-content; position:sticky; top:1rem; }
+      .products-panel { padding:1rem; }
+      .chip-row { display:flex; flex-wrap:wrap; gap:0.45rem; }
+      .chip { border:1px solid var(--line); border-radius:999px; padding:0.35rem 0.7rem; font-size:0.78rem; background:rgba(255,255,255,0.04); color:var(--muted); cursor:pointer; }
+      .chip.active { background:rgba(213,161,69,0.18); color:var(--gold-bright); border-color:rgba(213,161,69,0.55); }
+      .filter-group { margin-bottom:1rem; }
+      .filter-group h3 { font-family:"Trebuchet MS","Gill Sans","Segoe UI",sans-serif; font-size:0.88rem; margin:0 0 0.5rem; }
+      .collection-bar { display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; gap:1rem; flex-wrap:wrap; }
+      .collection-sort { border:1px solid var(--line); background:rgba(255,255,255,0.04); color:var(--text); border-radius:10px; padding:0.45rem 0.65rem; }
+      .product-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(220px,1fr)); gap:0.9rem; }
+      .product-tile { border:1px solid rgba(255,255,255,0.1); border-radius:14px; overflow:hidden; background:rgba(5,8,14,0.65); }
+      .product-media { width:100%; aspect-ratio:1; object-fit:cover; }
+      .product-body { padding:0.75rem; }
+      .product-name { margin:0; font-family:"Trebuchet MS","Gill Sans","Segoe UI",sans-serif; font-size:0.95rem; }
+      .product-meta { margin:0.35rem 0; color:var(--muted); font-size:0.82rem; }
+      .price-row { display:flex; justify-content:space-between; align-items:center; }
+      .price { color:var(--gold-bright); font-weight:700; }
+      .tile-btn { border:1px solid rgba(213,161,69,0.45); background:rgba(213,161,69,0.12); color:var(--gold-bright); border-radius:999px; font-size:0.78rem; padding:0.35rem 0.65rem; cursor:pointer; }
+      @media (max-width:920px){ .collection-wrap{ grid-template-columns:1fr; } .filters-panel{ position:static; } }
+    </style>
+  </head>
+  <body>
+    <div class="bg-noise" aria-hidden="true"></div>
+    <header class="site-header">
+      <div class="brand-block">
+        <a href="index.html" class="brand-mark">BRIGHTEN LIGHTING</a>
+        <p class="brand-tag">Light That Inspires</p>
+      </div>
+      <nav class="top-nav" aria-label="Main navigation">
+        <a href="index.html">Home</a>
+        <a href="about.html">About</a>
+        <a href="services.html">Services</a>
+        <a href="pricing.html">Pricing</a>
+        <a href="gallery.html">Gallery</a>
+        <a href="contact.html">Contact</a>
+      </nav>
+      <div style="display:flex; gap:0.8rem; align-items:center;">
+        <a href="cart.html" style="position:relative;">
+          <span style="font-size:1.5rem;">🛒</span>
+          <span data-cart-badge style="position:absolute; top:-8px; right:-8px; background:var(--gold); color:#211300; border-radius:50%; width:24px; height:24px; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:700; display:none;"></span>
+        </a>
+        <a href="request-service.html" class="btn btn-outline">Get Started</a>
+      </div>
+    </header>
+
+    <main class="page-main">
+      <section class="page-hero reveal">
+        <p class="eyebrow">Collection</p>
+        <h1>Ceiling Lights Collection</h1>
+        <p class="lead">Flush, panel, and decorative ceiling fixtures for every project.</p>
+      </section>
+
+      <section class="page-block reveal">
+        <div class="collection-wrap">
+          <aside class="filters-panel">
+            <div class="filter-group">
+              <h3>Style</h3>
+              <div class="chip-row">
+                <button class="chip active" data-filter="all">All</button>
+                <button class="chip" data-filter="modern">Modern</button>
+                <button class="chip" data-filter="minimalist">Minimalist</button>
+                <button class="chip" data-filter="decorative">Decorative</button>
+              </div>
+            </div>
+            <div class="filter-group">
+              <h3>Space</h3>
+              <div class="chip-row">
+                <button class="chip active" data-space="all">All</button>
+                <button class="chip" data-space="residential">Residential</button>
+                <button class="chip" data-space="commercial">Commercial</button>
+                <button class="chip" data-space="hospitality">Hospitality</button>
+              </div>
+            </div>
+            <div class="filter-group">
+              <h3>Price</h3>
+              <div class="chip-row">
+                <button class="chip active" data-price="all">All</button>
+                <button class="chip" data-price="low">Under KES 8,000</button>
+                <button class="chip" data-price="mid">KES 8,000-14,000</button>
+                <button class="chip" data-price="high">KES 14,000+</button>
+              </div>
+            </div>
+          </aside>
+
+          <div class="products-panel">
+            <div class="collection-bar">
+              <p class="collection-count"><span id="itemCount">0</span> products</p>
+              <select id="sortSelect" class="collection-sort" aria-label="Sort ceiling lights">
+                <option value="featured">Sort: Featured</option>
+                <option value="price-asc">Price: Low to High</option>
+                <option value="price-desc">Price: High to Low</option>
+                <option value="name-asc">Name: A to Z</option>
+              </select>
+            </div>
+
+            <div class="product-grid" id="productGrid">
+              <article class="product-tile" data-style="modern" data-space="residential" data-price="7200" data-name="Slim LED Flush">
+                <img class="product-media" src="assets/ceiling-light.jpg" alt="Slim LED Flush" />
+                <div class="product-body"><h3 class="product-name">Slim LED Flush</h3><p class="product-meta">Modern | Residential</p><div class="price-row"><span class="price">KES 7,200</span><button class="tile-btn" data-add data-id="ceil-slim-led" data-title="Slim LED Flush" data-price="7200" data-image="assets/ceiling-light.jpg">Add To Cart</button></div></div>
+              </article>
+              <article class="product-tile" data-style="minimalist" data-space="commercial" data-price="9800" data-name="Panel Pro 40W">
+                <img class="product-media" src="assets/ceiling-light.jpg" alt="Panel Pro 40W" />
+                <div class="product-body"><h3 class="product-name">Panel Pro 40W</h3><p class="product-meta">Minimalist | Commercial</p><div class="price-row"><span class="price">KES 9,800</span><button class="tile-btn" data-add data-id="ceil-panel-pro" data-title="Panel Pro 40W" data-price="9800" data-image="assets/ceiling-light.jpg">Add To Cart</button></div></div>
+              </article>
+              <article class="product-tile" data-style="decorative" data-space="hospitality" data-price="14500" data-name="Halo Ring Fixture">
+                <img class="product-media" src="assets/ceiling-light.jpg" alt="Halo Ring Fixture" />
+                <div class="product-body"><h3 class="product-name">Halo Ring Fixture</h3><p class="product-meta">Decorative | Hospitality</p><div class="price-row"><span class="price">KES 14,500</span><button class="tile-btn" data-add data-id="ceil-halo-ring" data-title="Halo Ring Fixture" data-price="14500" data-image="assets/ceiling-light.jpg">Add To Cart</button></div></div>
+              </article>
+              <article class="product-tile" data-style="modern" data-space="commercial" data-price="11200" data-name="Office Grid LED">
+                <img class="product-media" src="assets/ceiling-light.jpg" alt="Office Grid LED" />
+                <div class="product-body"><h3 class="product-name">Office Grid LED</h3><p class="product-meta">Modern | Commercial</p><div class="price-row"><span class="price">KES 11,200</span><button class="tile-btn" data-add data-id="ceil-office-grid" data-title="Office Grid LED" data-price="11200" data-image="assets/ceiling-light.jpg">Add To Cart</button></div></div>
+              </article>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer reveal">
+      <div class="footer-links">
+        <a href="cart.html">Cart</a>
+        <a href="request-service.html">Get Started</a>
+        <a href="about.html">About</a>
+        <a href="services.html">Services</a>
+        <a href="pricing.html">Pricing</a>
+        <a href="gallery.html">Gallery</a>
+        <a href="contact.html">Contact</a>
+      </div>
+      <p class="copyright">&copy; <span id="year"></span> Brighten Lighting. All rights reserved.</p>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+      const filterState = { style: 'all', space: 'all', price: 'all' };
+      const matchesPrice = (price, rule) => rule === 'all' ? true : rule === 'low' ? price < 8000 : rule === 'mid' ? price >= 8000 && price <= 14000 : price > 14000;
+      const applyFilters = () => {
+        const cards = Array.from(document.querySelectorAll('.product-tile'));
+        cards.forEach((card) => {
+          const styleOk = filterState.style === 'all' || (card.dataset.style || '').includes(filterState.style);
+          const spaceOk = filterState.space === 'all' || (card.dataset.space || '') === filterState.space;
+          const priceOk = matchesPrice(Number(card.dataset.price || 0), filterState.price);
+          card.style.display = styleOk && spaceOk && priceOk ? '' : 'none';
+        });
+        const countEl = document.querySelector('#itemCount');
+        if (countEl) countEl.textContent = cards.filter((card) => card.style.display !== 'none').length;
+      };
+      const applySorting = () => {
+        const select = document.querySelector('#sortSelect');
+        const grid = document.querySelector('#productGrid');
+        if (!select || !grid) return;
+        const cards = Array.from(grid.querySelectorAll('.product-tile'));
+        cards.sort((a, b) => select.value === 'price-asc' ? Number(a.dataset.price) - Number(b.dataset.price) : select.value === 'price-desc' ? Number(b.dataset.price) - Number(a.dataset.price) : select.value === 'name-asc' ? (a.dataset.name || '').localeCompare(b.dataset.name || '') : 0);
+        cards.forEach((card) => grid.appendChild(card));
+        applyFilters();
+      };
+      document.querySelectorAll('[data-filter]').forEach((btn) => btn.addEventListener('click', () => { document.querySelectorAll('[data-filter]').forEach((x) => x.classList.remove('active')); btn.classList.add('active'); filterState.style = btn.dataset.filter; applyFilters(); }));
+      document.querySelectorAll('[data-space]').forEach((btn) => btn.addEventListener('click', () => { document.querySelectorAll('[data-space]').forEach((x) => x.classList.remove('active')); btn.classList.add('active'); filterState.space = btn.dataset.space; applyFilters(); }));
+      document.querySelectorAll('[data-price]').forEach((btn) => btn.addEventListener('click', () => { document.querySelectorAll('[data-price]').forEach((x) => x.classList.remove('active')); btn.classList.add('active'); filterState.price = btn.dataset.price; applyFilters(); }));
+      const sortSelect = document.querySelector('#sortSelect');
+      if (sortSelect) sortSelect.addEventListener('change', applySorting);
+      document.querySelectorAll('[data-add]').forEach((btn) => btn.addEventListener('click', () => { cartStorage.addItem({ id: btn.dataset.id, name: btn.dataset.title, type: 'Ceiling Light', price: Number(btn.dataset.price || 0), image: btn.dataset.image, quantity: 1 }); }));
+      applyFilters();
+    </script>
+  </body>
+</html>

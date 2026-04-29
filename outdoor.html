@@ -3,8 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Pendant Lights Collection | Brighten Lighting</title>
-    <meta name="description" content="Shop pendant lights with filters, sorting, and quick add-to-cart." />
+    <title>Outdoor Lights Collection | Brighten Lighting</title>
+    <meta name="description" content="Shop outdoor and pathway lights with filters, sorting, and quick add-to-cart." />
     <link rel="stylesheet" href="styles.css" />
     <style>
       .collection-wrap { display:grid; grid-template-columns:260px 1fr; gap:1rem; }
@@ -57,28 +57,28 @@
     <main class="page-main">
       <section class="page-hero reveal">
         <p class="eyebrow">Collection</p>
-        <h1>Pendant Lights Collection</h1>
-        <p class="lead">Statement hanging fixtures for dining, counters, lounges, and commercial interiors.</p>
+        <h1>Outdoor Lights Collection</h1>
+        <p class="lead">Weather-rated fixtures for pathways, gardens, gates, and facade lighting.</p>
       </section>
 
       <section class="page-block reveal">
         <div class="collection-wrap">
           <aside class="filters-panel">
-            <div class="filter-group"><h3>Style</h3><div class="chip-row"><button class="chip active" data-filter="all">All</button><button class="chip" data-filter="modern">Modern</button><button class="chip" data-filter="vintage">Vintage</button><button class="chip" data-filter="minimalist">Minimalist</button></div></div>
-            <div class="filter-group"><h3>Space</h3><div class="chip-row"><button class="chip active" data-space="all">All</button><button class="chip" data-space="residential">Residential</button><button class="chip" data-space="commercial">Commercial</button><button class="chip" data-space="hospitality">Hospitality</button></div></div>
+            <div class="filter-group"><h3>Style</h3><div class="chip-row"><button class="chip active" data-filter="all">All</button><button class="chip" data-filter="modern">Modern</button><button class="chip" data-filter="security">Security</button><button class="chip" data-filter="garden">Garden</button></div></div>
+            <div class="filter-group"><h3>Application</h3><div class="chip-row"><button class="chip active" data-space="all">All</button><button class="chip" data-space="pathway">Pathway</button><button class="chip" data-space="facade">Facade</button><button class="chip" data-space="compound">Compound</button></div></div>
             <div class="filter-group"><h3>Price</h3><div class="chip-row"><button class="chip active" data-price="all">All</button><button class="chip" data-price="low">Under KES 8,000</button><button class="chip" data-price="mid">KES 8,000-14,000</button><button class="chip" data-price="high">KES 14,000+</button></div></div>
           </aside>
 
           <div class="products-panel">
             <div class="collection-bar">
               <p class="collection-count"><span id="itemCount">0</span> products</p>
-              <select id="sortSelect" class="collection-sort" aria-label="Sort pendant lights"><option value="featured">Sort: Featured</option><option value="price-asc">Price: Low to High</option><option value="price-desc">Price: High to Low</option><option value="name-asc">Name: A to Z</option></select>
+              <select id="sortSelect" class="collection-sort" aria-label="Sort outdoor lights"><option value="featured">Sort: Featured</option><option value="price-asc">Price: Low to High</option><option value="price-desc">Price: High to Low</option><option value="name-asc">Name: A to Z</option></select>
             </div>
             <div class="product-grid" id="productGrid">
-              <article class="product-tile" data-style="modern" data-space="residential" data-price="8500" data-name="Modern Pendant"><img class="product-media" src="assets/pendant-light.jpg" alt="Modern Pendant" /><div class="product-body"><h3 class="product-name">Modern Pendant</h3><p class="product-meta">Modern | Residential</p><div class="price-row"><span class="price">KES 8,500</span><button class="tile-btn" data-add data-id="modern-pendant" data-title="Modern Pendant" data-price="8500" data-image="assets/pendant-light.jpg">Add To Cart</button></div></div></article>
-              <article class="product-tile" data-style="vintage" data-space="hospitality" data-price="10400" data-name="Rustic Pendant"><img class="product-media" src="assets/pendant-light.jpg" alt="Rustic Pendant" /><div class="product-body"><h3 class="product-name">Rustic Pendant</h3><p class="product-meta">Vintage | Hospitality</p><div class="price-row"><span class="price">KES 10,400</span><button class="tile-btn" data-add data-id="rustic-pendant" data-title="Rustic Pendant" data-price="10400" data-image="assets/pendant-light.jpg">Add To Cart</button></div></div></article>
-              <article class="product-tile" data-style="minimalist" data-space="commercial" data-price="7600" data-name="Minimalist Pendant"><img class="product-media" src="assets/pendant-light.jpg" alt="Minimalist Pendant" /><div class="product-body"><h3 class="product-name">Minimalist Pendant</h3><p class="product-meta">Minimalist | Commercial</p><div class="price-row"><span class="price">KES 7,600</span><button class="tile-btn" data-add data-id="minimalist-pendant" data-title="Minimalist Pendant" data-price="7600" data-image="assets/pendant-light.jpg">Add To Cart</button></div></div></article>
-              <article class="product-tile" data-style="modern" data-space="hospitality" data-price="14900" data-name="Glass Cluster Pendant"><img class="product-media" src="assets/pendant-light.jpg" alt="Glass Cluster Pendant" /><div class="product-body"><h3 class="product-name">Glass Cluster Pendant</h3><p class="product-meta">Modern | Hospitality</p><div class="price-row"><span class="price">KES 14,900</span><button class="tile-btn" data-add data-id="glass-cluster" data-title="Glass Cluster Pendant" data-price="14900" data-image="assets/pendant-light.jpg">Add To Cart</button></div></div></article>
+              <article class="product-tile" data-style="garden" data-space="pathway" data-price="6900" data-name="Pathway Bollard"><img class="product-media" src="assets/outdoor-light.jpg" alt="Pathway Bollard" /><div class="product-body"><h3 class="product-name">Pathway Bollard</h3><p class="product-meta">Garden | Pathway</p><div class="price-row"><span class="price">KES 6,900</span><button class="tile-btn" data-add data-id="out-bollard" data-title="Pathway Bollard" data-price="6900" data-image="assets/outdoor-light.jpg">Add To Cart</button></div></div></article>
+              <article class="product-tile" data-style="security" data-space="compound" data-price="11800" data-name="Motion Flood Light"><img class="product-media" src="assets/outdoor-light.jpg" alt="Motion Flood Light" /><div class="product-body"><h3 class="product-name">Motion Flood Light</h3><p class="product-meta">Security | Compound</p><div class="price-row"><span class="price">KES 11,800</span><button class="tile-btn" data-add data-id="out-flood" data-title="Motion Flood Light" data-price="11800" data-image="assets/outdoor-light.jpg">Add To Cart</button></div></div></article>
+              <article class="product-tile" data-style="modern" data-space="facade" data-price="14900" data-name="Facade Beam Light"><img class="product-media" src="assets/outdoor-light.jpg" alt="Facade Beam Light" /><div class="product-body"><h3 class="product-name">Facade Beam Light</h3><p class="product-meta">Modern | Facade</p><div class="price-row"><span class="price">KES 14,900</span><button class="tile-btn" data-add data-id="out-beam" data-title="Facade Beam Light" data-price="14900" data-image="assets/outdoor-light.jpg">Add To Cart</button></div></div></article>
+              <article class="product-tile" data-style="garden" data-space="compound" data-price="9200" data-name="Garden Spike Set"><img class="product-media" src="assets/outdoor-light.jpg" alt="Garden Spike Set" /><div class="product-body"><h3 class="product-name">Garden Spike Set</h3><p class="product-meta">Garden | Compound</p><div class="price-row"><span class="price">KES 9,200</span><button class="tile-btn" data-add data-id="out-spike" data-title="Garden Spike Set" data-price="9200" data-image="assets/outdoor-light.jpg">Add To Cart</button></div></div></article>
             </div>
           </div>
         </div>
@@ -108,7 +108,7 @@
       document.querySelectorAll('[data-space]').forEach((btn) => btn.addEventListener('click', () => { document.querySelectorAll('[data-space]').forEach((x) => x.classList.remove('active')); btn.classList.add('active'); filterState.space = btn.dataset.space; applyFilters(); }));
       document.querySelectorAll('[data-price]').forEach((btn) => btn.addEventListener('click', () => { document.querySelectorAll('[data-price]').forEach((x) => x.classList.remove('active')); btn.classList.add('active'); filterState.price = btn.dataset.price; applyFilters(); }));
       const sortSelect = document.querySelector('#sortSelect'); if (sortSelect) sortSelect.addEventListener('change', applySorting);
-      document.querySelectorAll('[data-add]').forEach((btn) => btn.addEventListener('click', () => { cartStorage.addItem({ id: btn.dataset.id, name: btn.dataset.title, type: 'Pendant Light', price: Number(btn.dataset.price || 0), image: btn.dataset.image, quantity: 1 }); }));
+      document.querySelectorAll('[data-add]').forEach((btn) => btn.addEventListener('click', () => { cartStorage.addItem({ id: btn.dataset.id, name: btn.dataset.title, type: 'Outdoor Light', price: Number(btn.dataset.price || 0), image: btn.dataset.image, quantity: 1 }); }));
       applyFilters();
     </script>
   </body>
