@@ -1,0 +1,452 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bulbs Collection | Brighten Lighting</title>
+    <meta name="description" content="Shop decorative and LED bulbs with filters, prices, and quick add-to-cart." />
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      .collection-wrap {
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        gap: 1.2rem;
+      }
+
+      .filters-panel,
+      .products-panel {
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: linear-gradient(160deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+      }
+
+      .filters-panel {
+        padding: 1rem;
+        height: fit-content;
+        position: sticky;
+        top: 1rem;
+      }
+
+      .filter-title {
+        margin: 0 0 0.8rem;
+        font-size: 0.88rem;
+        color: var(--gold-bright);
+        letter-spacing: 0.08em;
+      }
+
+      .filter-group {
+        margin-bottom: 1rem;
+        padding-bottom: 0.8rem;
+        border-bottom: 1px dashed rgba(255, 255, 255, 0.12);
+      }
+
+      .filter-group:last-child {
+        margin-bottom: 0;
+        border-bottom: 0;
+        padding-bottom: 0;
+      }
+
+      .filter-group h3 {
+        font-family: "Trebuchet MS", "Gill Sans", "Segoe UI", sans-serif;
+        font-size: 0.9rem;
+        margin-bottom: 0.6rem;
+        color: var(--text);
+      }
+
+      .chip-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.45rem;
+      }
+
+      .chip {
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 0.35rem 0.7rem;
+        font-size: 0.78rem;
+        background: rgba(255, 255, 255, 0.04);
+        color: var(--muted);
+        cursor: pointer;
+      }
+
+      .chip.active {
+        background: rgba(213, 161, 69, 0.18);
+        color: var(--gold-bright);
+        border-color: rgba(213, 161, 69, 0.55);
+      }
+
+      .products-panel {
+        padding: 1rem;
+      }
+
+      .collection-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+      }
+
+      .collection-count {
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+
+      .collection-sort {
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.04);
+        color: var(--text);
+        border-radius: 10px;
+        padding: 0.5rem 0.7rem;
+      }
+
+      .product-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 0.95rem;
+      }
+
+      .product-tile {
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 14px;
+        overflow: hidden;
+        background: rgba(5, 8, 14, 0.65);
+        transition: transform 180ms ease, box-shadow 180ms ease;
+      }
+
+      .product-tile:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
+      }
+
+      .product-media {
+        aspect-ratio: 1;
+        width: 100%;
+        object-fit: cover;
+      }
+
+      .product-body {
+        padding: 0.75rem;
+      }
+
+      .product-name {
+        margin: 0;
+        font-family: "Trebuchet MS", "Gill Sans", "Segoe UI", sans-serif;
+        font-size: 0.95rem;
+        line-height: 1.3;
+      }
+
+      .product-meta {
+        margin: 0.4rem 0;
+        color: var(--muted);
+        font-size: 0.82rem;
+      }
+
+      .price-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 0.5rem;
+      }
+
+      .price {
+        color: var(--gold-bright);
+        font-weight: 700;
+      }
+
+      .tile-btn {
+        border: 1px solid rgba(213, 161, 69, 0.45);
+        background: rgba(213, 161, 69, 0.12);
+        color: var(--gold-bright);
+        border-radius: 999px;
+        font-size: 0.78rem;
+        padding: 0.35rem 0.65rem;
+        cursor: pointer;
+      }
+
+      @media (max-width: 920px) {
+        .collection-wrap {
+          grid-template-columns: 1fr;
+        }
+
+        .filters-panel {
+          position: static;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="bg-noise" aria-hidden="true"></div>
+    <header class="site-header">
+      <div class="brand-block">
+        <a href="index.html" class="brand-mark">BRIGHTEN LIGHTING</a>
+        <p class="brand-tag">Light That Inspires</p>
+      </div>
+      <nav class="top-nav" aria-label="Main navigation">
+        <a href="index.html">Home</a>
+        <a href="about.html">About</a>
+        <a href="services.html">Services</a>
+        <a href="pricing.html">Pricing</a>
+        <a href="gallery.html">Gallery</a>
+        <a href="contact.html">Contact</a>
+      </nav>
+      <div style="display: flex; gap: 0.8rem; align-items: center;">
+        <a href="cart.html" style="position: relative;">
+          <span style="font-size: 1.5rem;">🛒</span>
+          <span data-cart-badge style="position: absolute; top: -8px; right: -8px; background: var(--gold); color: #211300; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; display: none;"></span>
+        </a>
+        <a href="request-service.html" class="btn btn-outline">Get Started</a>
+      </div>
+    </header>
+
+    <main class="page-main">
+      <section class="page-hero reveal">
+        <p class="eyebrow">Collection</p>
+        <h1>Bulbs Collection</h1>
+        <p class="lead">Shop decorative, LED, and filament bulbs with quick filters and add-to-cart.</p>
+      </section>
+
+      <section class="page-block reveal">
+        <div class="collection-wrap">
+          <aside class="filters-panel" aria-label="Collection filters">
+            <p class="filter-title">FILTER</p>
+
+            <div class="filter-group">
+              <h3>Style</h3>
+              <div class="chip-row" data-filter-group="style">
+                <button class="chip active" data-filter="all">All</button>
+                <button class="chip" data-filter="filament">Filament</button>
+                <button class="chip" data-filter="led">LED</button>
+                <button class="chip" data-filter="decorative">Decorative</button>
+              </div>
+            </div>
+
+            <div class="filter-group">
+              <h3>Base Type</h3>
+              <div class="chip-row" data-filter-group="base">
+                <button class="chip active" data-base="all">All</button>
+                <button class="chip" data-base="e27">E27</button>
+                <button class="chip" data-base="gu10">GU10</button>
+                <button class="chip" data-base="b22">B22</button>
+              </div>
+            </div>
+
+            <div class="filter-group">
+              <h3>Price</h3>
+              <div class="chip-row" data-filter-group="price">
+                <button class="chip active" data-price="all">All</button>
+                <button class="chip" data-price="low">Under KES 700</button>
+                <button class="chip" data-price="mid">KES 700-1500</button>
+                <button class="chip" data-price="high">KES 1500+</button>
+              </div>
+            </div>
+          </aside>
+
+          <div class="products-panel">
+            <div class="collection-bar">
+              <p class="collection-count"><span id="itemCount">0</span> products</p>
+              <select id="sortSelect" class="collection-sort" aria-label="Sort bulbs">
+                <option value="featured">Sort: Featured</option>
+                <option value="price-asc">Price: Low to High</option>
+                <option value="price-desc">Price: High to Low</option>
+                <option value="name-asc">Name: A to Z</option>
+              </select>
+            </div>
+
+            <div class="product-grid" id="productGrid">
+              <article class="product-tile" data-style="filament decorative" data-base="e27" data-price="500" data-name="ST64 LED Amber">
+                <img class="product-media" src="assets/decorative-bulb.jpg" alt="ST64 LED Amber bulb" />
+                <div class="product-body">
+                  <h3 class="product-name">ST64 LED Amber</h3>
+                  <p class="product-meta">Filament | E27 | Warm amber glow</p>
+                  <div class="price-row">
+                    <span class="price">KES 500</span>
+                    <button class="tile-btn" data-add data-id="st64-amber" data-title="ST64 LED Amber" data-price="500" data-image="assets/decorative-bulb.jpg">Add To Cart</button>
+                  </div>
+                </div>
+              </article>
+
+              <article class="product-tile" data-style="filament" data-base="e27" data-price="1500" data-name="G125 Filament XL">
+                <img class="product-media" src="assets/decorative-bulb.jpg" alt="G125 Filament XL bulb" />
+                <div class="product-body">
+                  <h3 class="product-name">G125 Filament XL</h3>
+                  <p class="product-meta">Vintage globe | E27 | Statement bulb</p>
+                  <div class="price-row">
+                    <span class="price">KES 1,500</span>
+                    <button class="tile-btn" data-add data-id="g125-xl" data-title="G125 Filament XL" data-price="1500" data-image="assets/decorative-bulb.jpg">Add To Cart</button>
+                  </div>
+                </div>
+              </article>
+
+              <article class="product-tile" data-style="led" data-base="gu10" data-price="950" data-name="GU10 LED 7W Dimmable">
+                <img class="product-media" src="assets/ceiling-light.jpg" alt="GU10 LED dimmable bulb" />
+                <div class="product-body">
+                  <h3 class="product-name">GU10 LED 7W Dimmable</h3>
+                  <p class="product-meta">LED | GU10 | Dimmable spotlight</p>
+                  <div class="price-row">
+                    <span class="price">KES 950</span>
+                    <button class="tile-btn" data-add data-id="gu10-7w" data-title="GU10 LED 7W Dimmable" data-price="950" data-image="assets/ceiling-light.jpg">Add To Cart</button>
+                  </div>
+                </div>
+              </article>
+
+              <article class="product-tile" data-style="led decorative" data-base="b22" data-price="1250" data-name="A60 Bulb 8W">
+                <img class="product-media" src="assets/wall-light.jpg" alt="A60 8W bulb" />
+                <div class="product-body">
+                  <h3 class="product-name">A60 Bulb 8W</h3>
+                  <p class="product-meta">LED | B22 | Bright home utility</p>
+                  <div class="price-row">
+                    <span class="price">KES 1,250</span>
+                    <button class="tile-btn" data-add data-id="a60-8w" data-title="A60 Bulb 8W" data-price="1250" data-image="assets/wall-light.jpg">Add To Cart</button>
+                  </div>
+                </div>
+              </article>
+
+              <article class="product-tile" data-style="led" data-base="e27" data-price="500" data-name="Rechargeable USB Bulb">
+                <img class="product-media" src="assets/outdoor-light.jpg" alt="Rechargeable USB bulb" />
+                <div class="product-body">
+                  <h3 class="product-name">Rechargeable USB Bulb</h3>
+                  <p class="product-meta">LED | E27 | Backup power friendly</p>
+                  <div class="price-row">
+                    <span class="price">KES 500</span>
+                    <button class="tile-btn" data-add data-id="usb-recharge" data-title="Rechargeable USB Bulb" data-price="500" data-image="assets/outdoor-light.jpg">Add To Cart</button>
+                  </div>
+                </div>
+              </article>
+
+              <article class="product-tile" data-style="decorative" data-base="e27" data-price="2250" data-name="UV Bulb">
+                <img class="product-media" src="assets/decorative-bulb.jpg" alt="UV bulb" />
+                <div class="product-body">
+                  <h3 class="product-name">UV Bulb</h3>
+                  <p class="product-meta">Specialty | E27 | High-intensity UV</p>
+                  <div class="price-row">
+                    <span class="price">KES 2,250</span>
+                    <button class="tile-btn" data-add data-id="uv-bulb" data-title="UV Bulb" data-price="2250" data-image="assets/decorative-bulb.jpg">Add To Cart</button>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer reveal">
+      <div class="footer-links">
+        <a href="cart.html">Cart</a>
+        <a href="request-service.html">Get Started</a>
+        <a href="about.html">About</a>
+        <a href="services.html">Services</a>
+        <a href="pricing.html">Pricing</a>
+        <a href="gallery.html">Gallery</a>
+        <a href="contact.html">Contact</a>
+      </div>
+      <p class="copyright">&copy; <span id="year"></span> Brighten Lighting. All rights reserved.</p>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+      const filterState = {
+        style: 'all',
+        base: 'all',
+        price: 'all'
+      };
+
+      const matchesPrice = (price, rule) => {
+        if (rule === 'all') return true;
+        if (rule === 'low') return price < 700;
+        if (rule === 'mid') return price >= 700 && price <= 1500;
+        return price > 1500;
+      };
+
+      const applyFilters = () => {
+        const cards = Array.from(document.querySelectorAll('.product-tile'));
+        cards.forEach((card) => {
+          const styles = card.dataset.style || '';
+          const base = card.dataset.base || '';
+          const price = Number(card.dataset.price || 0);
+
+          const styleOk = filterState.style === 'all' || styles.includes(filterState.style);
+          const baseOk = filterState.base === 'all' || base === filterState.base;
+          const priceOk = matchesPrice(price, filterState.price);
+
+          card.style.display = styleOk && baseOk && priceOk ? '' : 'none';
+        });
+
+        const visible = cards.filter((card) => card.style.display !== 'none').length;
+        const countEl = document.querySelector('#itemCount');
+        if (countEl) countEl.textContent = visible;
+      };
+
+      const applySorting = () => {
+        const select = document.querySelector('#sortSelect');
+        const grid = document.querySelector('#productGrid');
+        if (!select || !grid) return;
+
+        const cards = Array.from(grid.querySelectorAll('.product-tile'));
+        const val = select.value;
+
+        cards.sort((a, b) => {
+          const aPrice = Number(a.dataset.price || 0);
+          const bPrice = Number(b.dataset.price || 0);
+          const aName = (a.dataset.name || '').toLowerCase();
+          const bName = (b.dataset.name || '').toLowerCase();
+
+          if (val === 'price-asc') return aPrice - bPrice;
+          if (val === 'price-desc') return bPrice - aPrice;
+          if (val === 'name-asc') return aName.localeCompare(bName);
+          return 0;
+        });
+
+        cards.forEach((card) => grid.appendChild(card));
+        applyFilters();
+      };
+
+      document.querySelectorAll('[data-filter]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('[data-filter]').forEach((x) => x.classList.remove('active'));
+          btn.classList.add('active');
+          filterState.style = btn.dataset.filter;
+          applyFilters();
+        });
+      });
+
+      document.querySelectorAll('[data-base]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('[data-base]').forEach((x) => x.classList.remove('active'));
+          btn.classList.add('active');
+          filterState.base = btn.dataset.base;
+          applyFilters();
+        });
+      });
+
+      document.querySelectorAll('[data-price]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('[data-price]').forEach((x) => x.classList.remove('active'));
+          btn.classList.add('active');
+          filterState.price = btn.dataset.price;
+          applyFilters();
+        });
+      });
+
+      const sortSelect = document.querySelector('#sortSelect');
+      if (sortSelect) sortSelect.addEventListener('change', applySorting);
+
+      document.querySelectorAll('[data-add]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          cartStorage.addItem({
+            id: btn.dataset.id,
+            name: btn.dataset.title,
+            type: 'Bulb',
+            price: Number(btn.dataset.price || 0),
+            image: btn.dataset.image,
+            quantity: 1
+          });
+        });
+      });
+
+      applyFilters();
+    </script>
+  </body>
+</html>
