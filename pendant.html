@@ -21,7 +21,13 @@
         <a href="pricing.html">Pricing</a>
         <a href="contact.html">Contact</a>
       </nav>
-      <a href="request-service.html" class="btn btn-outline">Get Started</a>
+      <div style="display: flex; gap: 0.8rem; align-items: center;">
+        <a href="cart.html" style="position: relative;">
+          <span style="font-size: 1.5rem;">🛒</span>
+          <span data-cart-badge style="position: absolute; top: -8px; right: -8px; background: var(--gold); color: #211300; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; display: none;"></span>
+        </a>
+        <a href="request-service.html" class="btn btn-outline">Get Started</a>
+      </div>
     </header>
 
     <main class="page-main">
@@ -59,28 +65,32 @@
             <img src="https://images.pexels.com/photos/97087/pendant-lights-lights-kitchen-kitchen-design-97087.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Modern pendant light" style="width:100%;height:200px;object-fit:cover;border-radius:12px;" />
             <h3>Modern Pendant</h3>
             <p class="muted" style="font-size:0.9rem;">Contemporary design with metallic finishes.</p>
-            <a class="btn btn-primary" style="width:100%;text-align:center;margin-top:1rem;" href="request-service.html?service=Pendant%20Lights&plan=Modern%20Pendant">Request</a>
+            <p class="muted" style="font-size:0.85rem; font-weight: 600;">KES 8,500</p>
+            <button class="btn btn-primary" style="width:100%;text-align:center;margin-top:1rem;cursor:pointer;" onclick="cartStorage.addItem({id:'modern-pendant',name:'Modern Pendant',type:'Pendant Light',price:8500,image:'https://images.pexels.com/photos/97087/pendant-lights-lights-kitchen-kitchen-design-97087.jpeg?auto=compress&cs=tinysrgb&w=400',quantity:1}); alert('Added to cart!');">Add to Cart</button>
           </article>
 
           <article class="product-card">
             <img src="https://images.pexels.com/photos/1799912/pexels-photo-1799912.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Rustic pendant light" style="width:100%;height:200px;object-fit:cover;border-radius:12px;" />
             <h3>Rustic Pendant</h3>
             <p class="muted" style="font-size:0.9rem;">Warm wood and vintage-style fixtures.</p>
-            <a class="btn btn-primary" style="width:100%;text-align:center;margin-top:1rem;" href="request-service.html?service=Pendant%20Lights&plan=Rustic%20Pendant">Request</a>
+            <p class="muted" style="font-size:0.85rem; font-weight: 600;">KES 7,200</p>
+            <button class="btn btn-primary" style="width:100%;text-align:center;margin-top:1rem;cursor:pointer;" onclick="cartStorage.addItem({id:'rustic-pendant',name:'Rustic Pendant',type:'Pendant Light',price:7200,image:'https://images.pexels.com/photos/1799912/pexels-photo-1799912.jpeg?auto=compress&cs=tinysrgb&w=400',quantity:1}); alert('Added to cart!');">Add to Cart</button>
           </article>
 
           <article class="product-card">
             <img src="https://images.pexels.com/photos/8483/pexels-photo-8483.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Glass pendant light" style="width:100%;height:200px;object-fit:cover;border-radius:12px;" />
             <h3>Glass Pendant</h3>
             <p class="muted" style="font-size:0.9rem;">Transparent and frosted glass options.</p>
-            <a class="btn btn-primary" style="width:100%;text-align:center;margin-top:1rem;" href="request-service.html?service=Pendant%20Lights&plan=Glass%20Pendant">Request</a>
+            <p class="muted" style="font-size:0.85rem; font-weight: 600;">KES 6,800</p>
+            <button class="btn btn-primary" style="width:100%;text-align:center;margin-top:1rem;cursor:pointer;" onclick="cartStorage.addItem({id:'glass-pendant',name:'Glass Pendant',type:'Pendant Light',price:6800,image:'https://images.pexels.com/photos/8483/pexels-photo-8483.jpeg?auto=compress&cs=tinysrgb&w=400',quantity:1}); alert('Added to cart!');">Add to Cart</button>
           </article>
 
           <article class="product-card">
             <img src="https://images.pexels.com/photos/1370816/pexels-photo-1370816.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Minimalist pendant light" style="width:100%;height:200px;object-fit:cover;border-radius:12px;" />
             <h3>Minimalist Pendant</h3>
             <p class="muted" style="font-size:0.9rem;">Sleek, simple designs for modern spaces.</p>
-            <a class="btn btn-primary" style="width:100%;text-align:center;margin-top:1rem;" href="request-service.html?service=Pendant%20Lights&plan=Minimalist%20Pendant">Request</a>
+            <p class="muted" style="font-size:0.85rem; font-weight: 600;">KES 5,900</p>
+            <button class="btn btn-primary" style="width:100%;text-align:center;margin-top:1rem;cursor:pointer;" onclick="cartStorage.addItem({id:'minimalist-pendant',name:'Minimalist Pendant',type:'Pendant Light',price:5900,image:'https://images.pexels.com/photos/1370816/pexels-photo-1370816.jpeg?auto=compress&cs=tinysrgb&w=400',quantity:1}); alert('Added to cart!');">Add to Cart</button>
           </article>
         </div>
       </section>

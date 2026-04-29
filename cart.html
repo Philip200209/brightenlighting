@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Shopping Cart | Brighten Lighting</title>
+    <meta name="description" content="Review your shopping cart and proceed to checkout." />
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      .cart-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+      }
+
+      .cart-items {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+      }
+
+      .cart-item {
+        display: grid;
+        grid-template-columns: 100px 1fr auto;
+        gap: 1.5rem;
+        align-items: center;
+        padding: 1.5rem;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.02);
+      }
+
+      .cart-item-image {
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 8px;
+      }
+
+      .cart-item-details h3 {
+        margin: 0 0 0.5rem 0;
+        font-size: 1.1rem;
+      }
+
+      .cart-item-details p {
+        margin: 0.25rem 0;
+        font-size: 0.9rem;
+      }
+
+      .cart-item-price {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--gold);
+      }
+
+      .cart-item-actions {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+      }
+
+      .qty-input {
+        width: 60px;
+        padding: 0.5rem;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--text);
+        text-align: center;
+      }
+
+      .remove-btn {
+        padding: 0.5rem 1rem;
+        background: rgba(255, 100, 100, 0.1);
+        border: 1px solid rgba(255, 100, 100, 0.3);
+        border-radius: 6px;
+        color: #ff6464;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 150ms ease;
+      }
+
+      .remove-btn:hover {
+        background: rgba(255, 100, 100, 0.2);
+        border-color: rgba(255, 100, 100, 0.5);
+      }
+
+      .cart-empty {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: var(--muted);
+      }
+
+      .cart-empty p {
+        margin-bottom: 1.5rem;
+      }
+
+      .cart-summary {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 2rem;
+        background: linear-gradient(160deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+        margin-top: 2rem;
+      }
+
+      .summary-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+        font-size: 1rem;
+      }
+
+      .summary-row.total {
+        border-top: 1px solid var(--line);
+        padding-top: 1rem;
+        margin-bottom: 0;
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--gold);
+      }
+
+      .cart-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        flex-wrap: wrap;
+      }
+
+      @media (max-width: 640px) {
+        .cart-item {
+          grid-template-columns: 80px 1fr;
+        }
+
+        .cart-item-actions {
+          grid-column: 1 / -1;
+          justify-content: flex-start;
+        }
+
+        .cart-item-image {
+          width: 80px;
+          height: 80px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="bg-noise" aria-hidden="true"></div>
+
+    <header class="site-header">
+      <div class="brand-block">
+        <a href="index.html" class="brand-mark">BRIGHTEN LIGHTING</a>
+        <p class="brand-tag">Light That Inspires</p>
+      </div>
+      <nav class="top-nav" aria-label="Main navigation">
+        <a href="index.html">Home</a>
+        <a href="about.html">About</a>
+        <a href="services.html">Services</a>
+        <a href="pricing.html">Pricing</a>
+        <a href="contact.html">Contact</a>
+      </nav>
+      <div style="display: flex; gap: 0.8rem; align-items: center;">
+        <a href="cart.html" style="position: relative;">
+          <span style="font-size: 1.5rem;">🛒</span>
+          <span data-cart-badge style="position: absolute; top: -8px; right: -8px; background: var(--gold); color: #211300; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; display: none;"></span>
+        </a>
+        <a href="request-service.html" class="btn btn-outline">Get Started</a>
+      </div>
+    </header>
+
+    <main class="page-main">
+      <section class="page-hero reveal">
+        <p class="eyebrow">Shopping Cart</p>
+        <h1>Your Items</h1>
+        <p class="lead">Review your cart and proceed to request a quote or checkout.</p>
+      </section>
+
+      <section class="page-block reveal">
+        <div id="cart-content">
+          <!-- Cart items or empty state will be rendered here -->
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer reveal">
+      <div class="footer-links">
+        <a href="request-service.html">Get Started</a>
+        <a href="about.html">About</a>
+        <a href="services.html">Services</a>
+        <a href="pricing.html">Pricing</a>
+        <a href="contact.html">Contact</a>
+      </div>
+      <p class="copyright">&copy; <span id="year"></span> Brighten Lighting. All rights reserved.</p>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+      const renderCart = () => {
+        const cart = cartStorage.getCart();
+        const container = document.querySelector('#cart-content');
+
+        if (cart.length === 0) {
+          container.innerHTML = `
+            <div class="cart-empty">
+              <h2>Your cart is empty</h2>
+              <p>Browse our lighting collections and add items to get started.</p>
+              <a href="index.html" class="btn btn-primary">Continue Shopping</a>
+            </div>
+          `;
+          return;
+        }
+
+        const itemsHtml = cart
+          .map(
+            (item) => `
+          <div class="cart-item">
+            <img src="${item.image || 'assets/pendant-light.jpg'}" alt="${item.name}" class="cart-item-image" />
+            <div class="cart-item-details">
+              <h3>${item.name}</h3>
+              <p class="muted">Type: ${item.type || 'Lighting Fixture'}</p>
+              <p class="muted">Unit Price: KES ${(item.price || 0).toLocaleString()}</p>
+            </div>
+            <div>
+              <div class="summary-row">
+                <span>Qty:</span>
+                <input type="number" min="1" max="100" value="${item.quantity}" class="qty-input" data-id="${item.id}" />
+              </div>
+              <p class="cart-item-price">KES ${((item.price || 0) * (item.quantity || 1)).toLocaleString()}</p>
+              <button class="remove-btn" onclick="cartStorage.removeItem('${item.id}'); renderCart();">Remove</button>
+            </div>
+          </div>
+          `
+          )
+          .join('');
+
+        const total = cartStorage.getTotal();
+        const html = `
+          <div class="cart-items">
+            ${itemsHtml}
+          </div>
+          <div class="cart-summary">
+            <div class="summary-row">
+              <span>Subtotal</span>
+              <span>KES ${total.toLocaleString()}</span>
+            </div>
+            <div class="summary-row total">
+              <span>Total</span>
+              <span>KES ${total.toLocaleString()}</span>
+            </div>
+            <div class="cart-actions">
+              <a href="request-service.html" class="btn btn-primary">Request Quote</a>
+              <a href="index.html" class="btn btn-ghost">Continue Shopping</a>
+              <button onclick="cartStorage.clearCart(); renderCart();" class="btn btn-ghost" style="background: rgba(255, 100, 100, 0.1); border-color: rgba(255, 100, 100, 0.3); color: #ff6464;">Clear Cart</button>
+            </div>
+          </div>
+        `;
+
+        container.innerHTML = html;
+
+        // Bind quantity input listeners
+        document.querySelectorAll('.qty-input').forEach((input) => {
+          input.addEventListener('change', (e) => {
+            const id = e.target.dataset.id;
+            const qty = parseInt(e.target.value, 10);
+            cartStorage.updateQuantity(id, qty);
+            renderCart();
+          });
+        });
+      };
+
+      renderCart();
+    </script>
+  </body>
+</html>

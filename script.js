@@ -21,6 +21,69 @@ if (yearElement) {
   yearElement.textContent = new Date().getFullYear();
 }
 
+// ===== CART MANAGEMENT =====
+const cartStorage = {
+  key: 'brightenLightingCart',
+  getCart() {
+    const stored = localStorage.getItem(this.key);
+    return stored ? JSON.parse(stored) : [];
+  },
+  saveCart(cart) {
+    localStorage.setItem(this.key, JSON.stringify(cart));
+  },
+  addItem(product) {
+    const cart = this.getCart();
+    const existing = cart.find((item) => item.id === product.id);
+    if (existing) {
+      existing.quantity += product.quantity || 1;
+    } else {
+      cart.push({ ...product, quantity: product.quantity || 1 });
+    }
+    this.saveCart(cart);
+    this.updateCartUI();
+  },
+  removeItem(productId) {
+    let cart = this.getCart();
+    cart = cart.filter((item) => item.id !== productId);
+    this.saveCart(cart);
+    this.updateCartUI();
+  },
+  updateQuantity(productId, quantity) {
+    const cart = this.getCart();
+    const item = cart.find((item) => item.id === productId);
+    if (item) {
+      if (quantity <= 0) {
+        this.removeItem(productId);
+      } else {
+        item.quantity = quantity;
+        this.saveCart(cart);
+        this.updateCartUI();
+      }
+    }
+  },
+  clearCart() {
+    localStorage.removeItem(this.key);
+    this.updateCartUI();
+  },
+  getTotal() {
+    return this.getCart().reduce((sum, item) => sum + (item.price || 0) * (item.quantity || 1), 0);
+  },
+  getItemCount() {
+    return this.getCart().reduce((sum, item) => sum + (item.quantity || 1), 0);
+  },
+  updateCartUI() {
+    const cartBadge = document.querySelector('[data-cart-badge]');
+    if (cartBadge) {
+      const count = this.getItemCount();
+      cartBadge.textContent = count;
+      cartBadge.style.display = count > 0 ? 'inline-block' : 'none';
+    }
+  }
+};
+
+// Update cart UI on page load
+document.addEventListener('DOMContentLoaded', () => cartStorage.updateCartUI());
+
 const applyQueryPrefill = () => {
   const params = new URLSearchParams(window.location.search);
   if (!params.toString()) {
