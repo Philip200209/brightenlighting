@@ -21,6 +21,68 @@ if (yearElement) {
   yearElement.textContent = new Date().getFullYear();
 }
 
+const initializeMobileMenu = () => {
+  const header = document.querySelector('.site-header');
+  const nav = document.querySelector('.top-nav');
+  if (!header || !nav) return;
+  if (header.querySelector('.menu-toggle')) return;
+
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'menu-toggle';
+  button.setAttribute('aria-label', 'Open menu');
+  button.setAttribute('aria-expanded', 'false');
+  button.innerHTML =
+    '<span class="menu-toggle-line"></span>' +
+    '<span class="menu-toggle-line"></span>' +
+    '<span class="menu-toggle-line"></span>';
+
+  const overlay = document.createElement('button');
+  overlay.type = 'button';
+  overlay.className = 'mobile-menu-overlay';
+  overlay.setAttribute('aria-label', 'Close menu overlay');
+
+  const closeMenu = () => {
+    nav.classList.remove('is-open');
+    document.body.classList.remove('nav-open');
+    button.classList.remove('is-active');
+    button.setAttribute('aria-expanded', 'false');
+  };
+
+  const openMenu = () => {
+    nav.classList.add('is-open');
+    document.body.classList.add('nav-open');
+    button.classList.add('is-active');
+    button.setAttribute('aria-expanded', 'true');
+  };
+
+  button.addEventListener('click', () => {
+    if (nav.classList.contains('is-open')) {
+      closeMenu();
+    } else {
+      openMenu();
+    }
+  });
+
+  overlay.addEventListener('click', closeMenu);
+  nav.querySelectorAll('a').forEach((link) => link.addEventListener('click', closeMenu));
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      closeMenu();
+    }
+  });
+
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > 830) {
+      closeMenu();
+    }
+  });
+
+  header.insertBefore(button, nav);
+  document.body.appendChild(overlay);
+};
+
 // ===== CART MANAGEMENT =====
 const cartStorage = {
   key: 'brightenLightingCart',
@@ -383,3 +445,4 @@ initializeImageSources();
 applyQueryPrefill();
 bindConversionForms();
 bindMpesaForms();
+initializeMobileMenu();
