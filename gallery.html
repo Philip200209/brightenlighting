@@ -4,8 +4,116 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Gallery | Brighten Lighting</title>
-    <meta name="description" content="Explore lighting inspiration and product category visuals from Brighten Lighting." />
+    <meta name="description" content="Explore our collection of premium lighting installations and product photography." />
     <link rel="stylesheet" href="styles.css" />
+    <style>
+      .gallery-categories {
+        display: flex;
+        gap: 0.8rem;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+      }
+
+      .gallery-filter-btn {
+        padding: 0.6rem 1.2rem;
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        background: transparent;
+        color: var(--text);
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 150ms ease;
+      }
+
+      .gallery-filter-btn:hover,
+      .gallery-filter-btn.active {
+        background: var(--gold);
+        color: #211300;
+        border-color: var(--gold);
+      }
+
+      .gallery-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+      }
+
+      .gallery-item {
+        position: relative;
+        overflow: hidden;
+        border-radius: 12px;
+        border: 1px solid var(--line);
+        background: linear-gradient(160deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+        aspect-ratio: 1;
+        cursor: pointer;
+        transition: transform 200ms ease, box-shadow 200ms ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 280px;
+      }
+
+      .gallery-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 300ms ease;
+      }
+
+      .gallery-item:hover img {
+        transform: scale(1.05);
+      }
+
+      .gallery-item-placeholder {
+        color: var(--muted);
+        text-align: center;
+        padding: 2rem;
+        font-size: 0.95rem;
+      }
+
+      .gallery-item-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.5) 100%);
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        padding: 1.5rem;
+        opacity: 0;
+        transition: opacity 200ms ease;
+      }
+
+      .gallery-item:hover .gallery-item-overlay {
+        opacity: 1;
+      }
+
+      .gallery-item-title {
+        color: var(--gold-bright);
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+      }
+
+      .gallery-item-desc {
+        color: rgba(255, 255, 255, 0.85);
+        font-size: 0.85rem;
+      }
+
+      @media (max-width: 768px) {
+        .gallery-grid {
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: 1rem;
+        }
+
+        .gallery-item {
+          min-height: 200px;
+        }
+
+        .gallery-item-overlay {
+          padding: 1rem;
+        }
+      }
+    </style>
   </head>
   <body>
     <div class="bg-noise" aria-hidden="true"></div>
@@ -20,51 +128,117 @@
         <a href="about.html">About</a>
         <a href="services.html">Services</a>
         <a href="pricing.html">Pricing</a>
-        <a href="coverage.html">Coverage</a>
         <a href="gallery.html">Gallery</a>
-        <a href="projects.html">Projects</a>
-        <a href="support.html">Support</a>
         <a href="contact.html">Contact</a>
       </nav>
-      <a href="request-service.html" class="btn btn-outline">Get Started</a>
+      <div style="display: flex; gap: 0.8rem; align-items: center;">
+        <a href="cart.html" style="position: relative;">
+          <span style="font-size: 1.5rem;">🛒</span>
+          <span data-cart-badge style="position: absolute; top: -8px; right: -8px; background: var(--gold); color: #211300; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; display: none;"></span>
+        </a>
+        <a href="request-service.html" class="btn btn-outline">Get Started</a>
+      </div>
     </header>
 
     <main class="page-main">
       <section class="page-hero reveal">
         <p class="eyebrow">Gallery</p>
-        <h1>Lighting Inspiration</h1>
-        <p class="lead">A quick visual look at fixture categories we supply and style options we can recommend.</p>
+        <h1>Lighting Installations &amp; Products</h1>
+        <p class="lead">Explore our collection of premium lighting solutions for every space and style.</p>
       </section>
 
       <section class="page-block reveal">
-        <div class="project-grid">
-          <article class="project-card">
-            <div class="category-photo cat-pendant" role="img" aria-label="Pendant lighting"></div>
-            <h3>Pendant Styles</h3>
-          </article>
-          <article class="project-card">
-            <div class="category-photo cat-ceiling" role="img" aria-label="Ceiling lighting"></div>
-            <h3>Ceiling Collections</h3>
-          </article>
-          <article class="project-card">
-            <div class="category-photo cat-wall" role="img" aria-label="Wall lighting"></div>
-            <h3>Wall Accent Lights</h3>
-          </article>
-          <article class="project-card">
-            <div class="category-photo cat-outdoor" role="img" aria-label="Outdoor lighting"></div>
-            <h3>Outdoor Path Lights</h3>
-          </article>
-          <article class="project-card">
-            <div class="category-photo cat-bulb" role="img" aria-label="Decorative bulbs"></div>
-            <h3>Decorative Bulbs</h3>
-          </article>
+        <h2>Browse by Category</h2>
+        <div class="gallery-categories">
+          <button class="gallery-filter-btn active" data-filter="all">All</button>
+          <button class="gallery-filter-btn" data-filter="pendant">Pendant Lights</button>
+          <button class="gallery-filter-btn" data-filter="ceiling">Ceiling Lights</button>
+          <button class="gallery-filter-btn" data-filter="wall">Wall Lights</button>
+          <button class="gallery-filter-btn" data-filter="outdoor">Outdoor</button>
+          <button class="gallery-filter-btn" data-filter="decorative">Decorative</button>
+        </div>
+
+        <div class="gallery-grid" id="gallery-grid">
+          <div class="gallery-item" data-category="pendant">
+            <div class="gallery-item-placeholder">
+              <p>📸</p>
+              <p>Pendant Light Image</p>
+              <p style="font-size: 0.8rem; color: var(--muted); margin-top: 0.5rem;">Coming soon</p>
+            </div>
+          </div>
+          <div class="gallery-item" data-category="pendant">
+            <div class="gallery-item-placeholder">
+              <p>📸</p>
+              <p>Pendant Light Image</p>
+              <p style="font-size: 0.8rem; color: var(--muted); margin-top: 0.5rem;">Coming soon</p>
+            </div>
+          </div>
+          <div class="gallery-item" data-category="ceiling">
+            <div class="gallery-item-placeholder">
+              <p>📸</p>
+              <p>Ceiling Light Image</p>
+              <p style="font-size: 0.8rem; color: var(--muted); margin-top: 0.5rem;">Coming soon</p>
+            </div>
+          </div>
+          <div class="gallery-item" data-category="ceiling">
+            <div class="gallery-item-placeholder">
+              <p>📸</p>
+              <p>Ceiling Light Image</p>
+              <p style="font-size: 0.8rem; color: var(--muted); margin-top: 0.5rem;">Coming soon</p>
+            </div>
+          </div>
+          <div class="gallery-item" data-category="wall">
+            <div class="gallery-item-placeholder">
+              <p>📸</p>
+              <p>Wall Light Image</p>
+              <p style="font-size: 0.8rem; color: var(--muted); margin-top: 0.5rem;">Coming soon</p>
+            </div>
+          </div>
+          <div class="gallery-item" data-category="wall">
+            <div class="gallery-item-placeholder">
+              <p>📸</p>
+              <p>Wall Light Image</p>
+              <p style="font-size: 0.8rem; color: var(--muted); margin-top: 0.5rem;">Coming soon</p>
+            </div>
+          </div>
+          <div class="gallery-item" data-category="outdoor">
+            <div class="gallery-item-placeholder">
+              <p>📸</p>
+              <p>Outdoor Light Image</p>
+              <p style="font-size: 0.8rem; color: var(--muted); margin-top: 0.5rem;">Coming soon</p>
+            </div>
+          </div>
+          <div class="gallery-item" data-category="outdoor">
+            <div class="gallery-item-placeholder">
+              <p>📸</p>
+              <p>Outdoor Light Image</p>
+              <p style="font-size: 0.8rem; color: var(--muted); margin-top: 0.5rem;">Coming soon</p>
+            </div>
+          </div>
+          <div class="gallery-item" data-category="decorative">
+            <div class="gallery-item-placeholder">
+              <p>📸</p>
+              <p>Decorative Bulb Image</p>
+              <p style="font-size: 0.8rem; color: var(--muted); margin-top: 0.5rem;">Coming soon</p>
+            </div>
+          </div>
+          <div class="gallery-item" data-category="decorative">
+            <div class="gallery-item-placeholder">
+              <p>📸</p>
+              <p>Decorative Bulb Image</p>
+              <p style="font-size: 0.8rem; color: var(--muted); margin-top: 0.5rem;">Coming soon</p>
+            </div>
+          </div>
         </div>
       </section>
 
       <section class="page-block reveal">
-        <h2>Want This Style For Your Space?</h2>
-        <p class="lead">Send your inspiration and room photos and we will recommend matching products.</p>
-        <a href="request-service.html?service=Consultation" class="btn btn-primary">Start Design Request</a>
+        <h2>Ready to Upgrade Your Lighting?</h2>
+        <p class="lead">Browse our product collections or request a custom consultation with our team.</p>
+        <div class="form-actions">
+          <a href="pendant.html" class="btn btn-primary">View Products</a>
+          <a href="request-service.html?service=Consultation" class="btn btn-ghost">Request Consultation</a>
+        </div>
       </section>
     </main>
 
@@ -74,17 +248,32 @@
         <a href="about.html">About</a>
         <a href="services.html">Services</a>
         <a href="pricing.html">Pricing</a>
-        <a href="coverage.html">Coverage</a>
         <a href="gallery.html">Gallery</a>
-        <a href="projects.html">Projects</a>
-        <a href="support.html">Support</a>
         <a href="contact.html">Contact</a>
-        <a href="privacy.html">Privacy Policy</a>
-        <a href="terms.html">Terms of Service</a>
       </div>
       <p class="copyright">&copy; <span id="year"></span> Brighten Lighting. All rights reserved.</p>
     </footer>
 
     <script src="script.js"></script>
+    <script>
+      // Gallery filter functionality
+      document.querySelectorAll('.gallery-filter-btn').forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+          // Update active button
+          document.querySelectorAll('.gallery-filter-btn').forEach((b) => b.classList.remove('active'));
+          e.target.classList.add('active');
+
+          // Filter gallery items
+          const filter = e.target.dataset.filter;
+          document.querySelectorAll('.gallery-item').forEach((item) => {
+            if (filter === 'all' || item.dataset.category === filter) {
+              item.style.display = '';
+            } else {
+              item.style.display = 'none';
+            }
+          });
+        });
+      });
+    </script>
   </body>
 </html>
