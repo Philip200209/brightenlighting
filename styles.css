@@ -987,9 +987,29 @@ textarea {
 }
 
 @media (max-width: 830px) {
+  .site-header {
+    position: relative;
+    padding-top: 3.3rem;
+    justify-content: center;
+  }
+
+  .brand-block {
+    text-align: center;
+  }
+
   .menu-toggle {
     display: inline-flex;
     flex-direction: column;
+    position: absolute;
+    top: 0.7rem;
+    left: 0;
+    z-index: 1110;
+  }
+
+  .site-header > div[style*="display: flex"] {
+    position: absolute;
+    top: 0.7rem;
+    right: 0;
   }
 
   .top-nav {
