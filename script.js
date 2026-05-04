@@ -312,6 +312,11 @@ const findFirstAvailableImage = async (paths) => {
 };
 
 const initializeImageSources = async () => {
+  const needsImageSources = document.querySelector('.hero-cover, .photo-tile, .category-photo, .service-photo, .event-poster-img');
+  if (!needsImageSources) {
+    return;
+  }
+
   const pageBackgroundCandidates = [
     'assets/whatsapp-background.jpg',
     'assets/whatsapp-background.jpeg',

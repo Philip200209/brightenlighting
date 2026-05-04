@@ -190,6 +190,16 @@
         </div>
       </section>
 
+      <section class="page-block reveal" aria-labelledby="live-products-title">
+        <div class="section-head">
+          <p class="eyebrow">Live Catalog</p>
+          <h2 id="live-products-title">Products From The Server</h2>
+        </div>
+        <p class="lead">This list is loaded from the JSON store through the Node.js backend, so it stays in sync with the admin dashboard.</p>
+        <div class="grid" id="liveProductsGrid"></div>
+        <p class="lead" id="liveProductsStatus"></p>
+      </section>
+
       <section class="split reveal">
         <div class="panel panel-dark">
           <p class="eyebrow">Why Brighten</p>
@@ -227,6 +237,7 @@
         <a href="about.html">About</a>
         <a href="services.html">Services</a>
         <a href="pricing.html">Pricing</a>
+        <a href="/admin">Admin Dashboard</a>
         <a href="coverage.html">Coverage</a>
         <a href="gallery.html">Gallery</a>
         <a href="projects.html">Projects</a>
@@ -241,5 +252,99 @@
     <a class="floating-cta" href="request-service.html">Get Started</a>
 
     <script src="script.js"></script>
+    <script>
+      const liveProductsGrid = document.querySelector('#liveProductsGrid');
+      const liveProductsStatus = document.querySelector('#liveProductsStatus');
+
+      const escapeHtml = (value) =>
+        String(value ?? '')
+          .replaceAll('&', '&amp;')
+          .replaceAll('<', '&lt;')
+          .replaceAll('>', '&gt;')
+          .replaceAll('"', '&quot;')
+          .replaceAll("'", '&#39;');
+
+      const formatMoney = (value) => `KES ${Number(value || 0).toLocaleString('en-KE')}`;
+
+      const renderLiveProducts = (products) => {
+        if (!liveProductsGrid) return;
+
+        if (!products.length) {
+          liveProductsGrid.innerHTML = '<div class="empty-state">No products available yet.</div>';
+          return;
+        }
+
+        liveProductsGrid.innerHTML = products
+          .map(
+            (product) => `
+              <article class="product-card">
+                <img
+                  src="${escapeHtml(product.image || '/assets/decorative-luxury-cluster.jpg')}"
+                  alt="${escapeHtml(product.name)}"
+                  style="width:100%;height:160px;object-fit:cover;border-radius:12px;margin-bottom:0.72rem;"
+                />
+                <h3>${escapeHtml(product.name)}</h3>
+                <p>${escapeHtml(product.description || '')}</p>
+                <p style="margin-top:0.5rem;color:var(--gold-bright);font-weight:700;">${formatMoney(product.price)}</p>
+                <button
+                  type="button"
+                  class="btn btn-primary"
+                  data-add-product
+                  data-id="${escapeHtml(product.id)}"
+                  data-name="${escapeHtml(product.name)}"
+                  data-price="${escapeHtml(product.price)}"
+                  data-image="${escapeHtml(product.image || '')}"
+                  data-category="${escapeHtml(product.category || 'lighting')}"
+                >
+                  Add To Cart
+                </button>
+              </article>
+            `
+          )
+          .join('');
+      };
+
+      const loadLiveProducts = async () => {
+        if (!liveProductsGrid) return;
+
+        try {
+          const response = await fetch('/api/products');
+          if (!response.ok) {
+            throw new Error('Unable to load products');
+          }
+
+          const products = await response.json();
+          renderLiveProducts(products);
+          if (liveProductsStatus) {
+            liveProductsStatus.textContent = 'Live products loaded from the server.';
+          }
+        } catch (error) {
+          if (liveProductsStatus) {
+            liveProductsStatus.textContent = 'Unable to load live products right now.';
+          }
+          liveProductsGrid.innerHTML = '<div class="empty-state">Product feed unavailable.</div>';
+        }
+      };
+
+      if (liveProductsGrid) {
+        liveProductsGrid.addEventListener('click', (event) => {
+          const button = event.target.closest('[data-add-product]');
+          if (!button || typeof cartStorage === 'undefined') return;
+
+          const product = {
+            id: button.dataset.id,
+            name: button.dataset.name,
+            price: Number(button.dataset.price || 0),
+            image: button.dataset.image,
+            type: button.dataset.category,
+            quantity: 1,
+          };
+
+          cartStorage.addItem(product);
+        });
+      }
+
+      loadLiveProducts();
+    </script>
   </body>
 </html>

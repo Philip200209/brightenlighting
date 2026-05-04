@@ -1,0 +1,62 @@
+[
+  {
+    "id": "prod-decorative-cluster",
+    "name": "Decorative Cluster Pendant",
+    "category": "decorative",
+    "price": 5500,
+    "image": "/assets/decorative-luxury-cluster.jpg",
+    "description": "Modern statement decorative pendant cluster",
+    "featured": true,
+    "stock": 8,
+    "createdAt": "2026-04-30T00:00:00.000Z",
+    "updatedAt": "2026-04-30T00:00:00.000Z"
+  },
+  {
+    "id": "prod-pendant-trio",
+    "name": "Pendant Light Trio",
+    "category": "pendant",
+    "price": 5099,
+    "image": "/assets/pendant-light.jpg",
+    "description": "Warm interior pendant set for dining and counters",
+    "featured": true,
+    "stock": 4,
+    "createdAt": "2026-04-30T00:00:00.000Z",
+    "updatedAt": "2026-05-02T06:53:12.415Z"
+  },
+  {
+    "id": "prod-ceiling-panel",
+    "name": "Ceiling Panel Light",
+    "category": "ceiling",
+    "price": 6800,
+    "image": "/assets/ceiling-light.jpg",
+    "description": "Slim overhead lighting for clean modern rooms",
+    "featured": true,
+    "stock": 6,
+    "createdAt": "2026-04-30T00:00:00.000Z",
+    "updatedAt": "2026-04-30T00:00:00.000Z"
+  },
+  {
+    "id": "prod-wall-sconce",
+    "name": "Wall Sconce Pair",
+    "category": "wall",
+    "price": 4200,
+    "image": "/assets/wall-light.jpg",
+    "description": "Ambient wall lighting for hallways and lounges",
+    "featured": false,
+    "stock": 10,
+    "createdAt": "2026-04-30T00:00:00.000Z",
+    "updatedAt": "2026-04-30T00:00:00.000Z"
+  },
+  {
+    "id": "prod-outdoor-path",
+    "name": "Outdoor Path Light",
+    "category": "outdoor",
+    "price": 5900,
+    "image": "/assets/outdoor-light.jpg",
+    "description": "Weather-ready exterior lighting for entrances and paths",
+    "featured": false,
+    "stock": 7,
+    "createdAt": "2026-04-30T00:00:00.000Z",
+    "updatedAt": "2026-05-02T06:53:44.583Z"
+  }
+]
