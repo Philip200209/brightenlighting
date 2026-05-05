@@ -1,345 +1,370 @@
-# Deployment Guide - Brighten Lighting
+# Free-Forever Stack Deployment Guide
 
-## GitHub Repository
+## Overview
 
-The admin dashboard and backend are now live on GitHub:
-- **Repository**: https://github.com/Philip200209/brightenlighting
-- **Branch**: main
-- **Latest Commit**: Enhanced admin dashboard with image gallery picker, stock management, and admin settings panel
+This guide covers deploying **Brighten Lighting** using the Free-Forever Stack:
+- **Frontend**: GitHub Pages (free static hosting)
+- **Backend**: Render.com (free Node.js hosting)
+- **Database**: MongoDB Atlas (free tier with 512MB storage)
 
-## Deployed Features
+---
 
-✅ **Image Gallery Picker** - Admin can select product images from assets folder
-✅ **Stock Management** - Quick +/- buttons to adjust inventory directly from product table
-✅ **Admin Settings Panel** - Secure password and username management
-✅ **Live Product Management** - Add, edit, delete products with instant updates
-✅ **M-Pesa Integration** - Order tracking from payment callbacks
-✅ **Session Authentication** - 1-hour session timeout with password hashing
-✅ **JSON Data Persistence** - All data stored in backend/data/ folder
-
-## Local Development Setup
-
-### Prerequisites
-- Node.js 16+ installed
-- npm installed
-- Git installed
-
-### Installation
-
-1. Clone the repository:
-```bash
-git clone https://github.com/Philip200209/brightenlighting.git
-cd brightenlighting
-```
-
-2. Install backend dependencies:
-```bash
-cd backend
-npm install
-```
-
-3. Create `.env` file in backend folder:
-```bash
-cp .env.example .env
-```
-
-4. Update `.env` with your values:
-```
-PORT=3000
-ADMIN_USER=your_username
-ADMIN_PASS=your_secure_password
-SESSION_SECRET=your_session_secret
-```
-
-5. Start the backend server:
-```bash
-npm start
-```
-
-6. The site will be available at:
-- Frontend: http://localhost:3000
-- Admin: http://localhost:3000/admin
-- Login: http://localhost:3000/login.html
-
-## Production Deployment (Heroku, Railway, Render, etc.)
-
-### Option 1: Heroku Deployment
-
-1. Install Heroku CLI and login:
-```bash
-heroku login
-```
-
-2. Create Heroku app:
-```bash
-heroku create your-app-name
-```
-
-3. Add buildpacks (if not auto-detected):
-```bash
-heroku buildpacks:add heroku/nodejs
-```
-
-4. Set environment variables:
-```bash
-heroku config:set ADMIN_USER=your_username
-heroku config:set ADMIN_PASS=your_secure_password
-heroku config:set PORT=3000
-heroku config:set MPESA_CONSUMER_KEY=your_mpesa_key
-# ... other M-Pesa env vars
-```
-
-5. Deploy:
-```bash
-git push heroku main
-```
-
-6. View logs:
-```bash
-heroku logs --tail
-```
-
-### Option 2: Railway.app Deployment
-
-1. Push to GitHub (already done)
-2. Go to https://railway.app
-3. Click "New Project" → "Deploy from GitHub"
-4. Select `brightenlighting` repository
-5. Add environment variables from `.env` file
-6. Deploy automatically on each push
-
-### Option 3: Render.com Deployment
-
-1. Go to https://render.com/dashboard
-2. Click "New Web Service"
-3. Connect GitHub account and select repository
-4. Configure:
-   - Build Command: `cd backend && npm install`
-   - Start Command: `cd backend && npm start`
-   - Add environment variables
-5. Deploy
-
-### Option 4: DigitalOcean App Platform
-
-1. Go to DigitalOcean Dashboard
-2. Create new App
-3. Connect GitHub repository
-4. Choose backend folder as source
-5. Configure environment variables
-6. Deploy
-
-## Database Persistence in Production
-
-**Important**: The current setup uses local JSON files for data storage. For production:
-
-### Option A: Keep JSON Files (Simple)
-- Data persists in `backend/data/` folder
-- Works on single-server deployments
-- Not ideal for distributed systems
-
-### Option B: Migrate to MongoDB (Recommended)
-
-Install MongoDB Atlas cloud database and update backend to use MongoDB instead of JSON files.
-
-Update dependencies:
-```bash
-npm install mongoose
-```
-
-### Option C: Use PostgreSQL
-
-Install Supabase or PostgreSQL and update backend accordingly.
-
-## File Structure
+## Architecture
 
 ```
-brightenlighting/
-├── index.html                    # Frontend home
-├── login.html                    # Admin login page
-├── admin.html                    # Admin dashboard
-├── decorative.html               # Category pages
-├── assets/                       # Product images
-│   ├── decorative-luxury-cluster.jpg
-│   ├── pendant-light.jpg
-│   └── ...
-├── backend/
-│   ├── index.js                  # Express server
-│   ├── package.json              # Dependencies
-│   ├── .env.example              # Environment template
-│   ├── private/
-│   │   └── admin.html            # Protected admin page
-│   └── data/
-│       ├── products.json         # Product catalog
-│       ├── orders.json           # M-Pesa payments
-│       └── admin.json            # Admin credentials
-└── README.md
+┌─────────────────────────────────────────────────────────┐
+│                    GitHub Pages                         │
+│        (Frontend - Static HTML/CSS/JS)                  │
+│     https://yourusername.github.io/brightenlighting    │
+└──────────────────────┬──────────────────────────────────┘
+                       │ API Calls
+                       ▼
+        ┌──────────────────────────────┐
+        │      Render.com Backend      │
+        │   (Node.js/Express API)      │
+        │  https://...onrender.com     │
+        └──────────────┬───────────────┘
+                       │ MongoDB Driver
+                       ▼
+        ┌──────────────────────────────┐
+        │    MongoDB Atlas (Cloud)     │
+        │   (Database - Free Tier)     │
+        └──────────────────────────────┘
 ```
 
-## Environment Variables (Production)
+---
 
-Required for full functionality:
+## Part 1: MongoDB Atlas Setup
 
-```env
-# Server
-PORT=3000
-NODE_ENV=production
+### Step 1: Create MongoDB Atlas Account
 
-# Admin
-ADMIN_USER=change_me_in_production
-ADMIN_PASS=strong_password_here
-SESSION_SECRET=random_string_32_chars_minimum
+1. Go to https://www.mongodb.com/cloud/atlas
+2. Click **"Try Free"** or **"Sign Up"**
+3. Create account with email and password
+4. Complete verification
 
-# M-Pesa Integration
-MPESA_ENV=production
-MPESA_CONSUMER_KEY=your_consumer_key
-MPESA_CONSUMER_SECRET=your_consumer_secret
-MPESA_SHORTCODE=your_shortcode
-MPESA_PASSKEY=your_passkey
-MPESA_CALLBACK_URL=https://yourdomain.com/mpesa/callback
+### Step 2: Create Free Cluster
+
+1. After login, click **"Create"** (or **"Build a Cluster"**)
+2. Choose **"M0 Free"** cluster tier
+3. Select your preferred region (closest to your users)
+4. Click **"Create Deployment"**
+5. Wait 2-3 minutes for cluster to initialize
+
+### Step 3: Set Up Database User
+
+1. In the cluster view, click **"Database Access"** (left sidebar)
+2. Click **"Add New Database User"**
+3. Choose **"Password"** authentication method
+4. Username: `brightenlighting`
+5. Password: Generate secure password (click "Autogenerate Secure Password")
+6. **SAVE THIS PASSWORD** - you'll need it for `.env`
+7. Built-in Role: **"Read and write to any database"**
+8. Click **"Add User"**
+
+### Step 4: Configure Network Access
+
+1. Click **"Network Access"** (left sidebar)
+2. Click **"Add IP Address"**
+3. Click **"Allow access from anywhere"** (for development)
+   - Production: Add only Render.com's IP ranges
+4. Click **"Confirm"**
+
+### Step 5: Get Connection String
+
+1. Go back to **"Databases"**
+2. Click **"Connect"** on your cluster
+3. Choose **"Node.js"** driver
+4. Copy the connection string
+5. Replace `<username>` with `brightenlighting`
+6. Replace `<password>` with your generated password
+7. Replace `myFirstDatabase` with `brightenlighting`
+
+**Example:**
+```
+mongodb+srv://brightenlighting:YOUR_PASSWORD@cluster.mongodb.net/brightenlighting?retryWrites=true&w=majority
 ```
 
-## Continuous Deployment
+This is your `MONGODB_URI` for `.env`
 
-The repository is set up for automatic deployment:
+---
 
-1. Push to main branch
-2. GitHub Actions (or platform CI/CD) automatically:
-   - Installs dependencies
-   - Runs tests (if configured)
-   - Deploys to production
-   - Notifies on success/failure
+## Part 2: Render.com Backend Deployment
 
-## Monitoring
+### Step 1: Prepare Backend for Render
 
-### Check Server Status
-```bash
-curl https://yourdomain.com
-curl https://yourdomain.com/api/session
+1. Ensure `backend/package.json` has Node.js engine specified:
+```json
+"engines": {
+  "node": ">=16.0.0"
+}
 ```
 
-### View Backend Logs
-- Heroku: `heroku logs --tail`
-- Railway: Dashboard logs
-- Render: Logs tab in dashboard
+2. Create `backend/.env.example` (already provided) with all required variables
 
-### Check Database Files
-```bash
-ls -la backend/data/
-```
-
-## Backup & Recovery
-
-### Backup Data
-```bash
-# Local backup
-cp -r backend/data/ backup_$(date +%Y%m%d)
-
-# Or for production, download from server:
-scp -r user@server:/app/backend/data/ ./backup
-```
-
-### Restore Data
-```bash
-# Stop server
-npm stop
-
-# Restore files
-rm -rf backend/data/*
-cp -r backup_20260504/* backend/data/
-
-# Restart
-npm start
-```
-
-## Security Checklist
-
-- [ ] Change default admin password immediately
-- [ ] Set unique admin username
-- [ ] Use HTTPS only in production
-- [ ] Store `.env` file securely (not in git)
-- [ ] Set strong SESSION_SECRET (32+ random characters)
-- [ ] Enable firewall rules
-- [ ] Set up SSL/TLS certificate
-- [ ] Configure CORS appropriately
-- [ ] Regular password rotation (monthly)
-- [ ] Backup data regularly
-- [ ] Monitor error logs
-- [ ] Update Node.js and dependencies
-
-## Updating the Site
-
-To deploy updates:
-
-1. Make changes locally
-2. Test thoroughly
-3. Commit to git:
+3. Commit all changes to GitHub:
 ```bash
 git add .
-git commit -m "describe changes"
-```
-
-4. Push to GitHub:
-```bash
+git commit -m "Add MongoDB backend and deployment config"
 git push origin main
 ```
 
-5. Automatic deployment triggers (depends on platform)
-6. Verify at https://yourdomain.com/admin
+### Step 2: Create Render.com Account
 
-## Troubleshooting
+1. Go to https://render.com
+2. Click **"Sign up"**
+3. Choose **"GitHub"** (easier integration)
+4. Authorize Render to access your GitHub
+5. Complete signup
 
-### Site Shows 404
-- Check that server is running
-- Verify PORT environment variable
-- Check firewall/proxy settings
+### Step 3: Create Web Service
 
-### Can't Login to Admin
-- Verify ADMIN_USER and ADMIN_PASS in `.env`
-- Check browser cookies are enabled
-- Clear browser cache
+1. Click **"New +"** (top navigation)
+2. Select **"Web Service"**
+3. Choose your **brightenlighting** repository
+4. Fill in details:
+   - **Name**: `brighten-lighting-api`
+   - **Environment**: `Node`
+   - **Build Command**: `cd backend && npm install`
+   - **Start Command**: `cd backend && npm start`
+   - **Instance Type**: **"Free"**
 
-### Images Not Loading
-- Verify files are in `assets/` folder
-- Check file permissions (should be readable)
-- Verify paths in products.json
+### Step 4: Add Environment Variables
 
-### M-Pesa Not Working
-- Verify all MPESA_* environment variables
-- Check credentials on M-Pesa dashboard
-- Ensure callback URL is correct
-- Test in sandbox first
+On the Render settings page, scroll to **"Environment"** and add:
 
-## Performance Optimization
+```
+PORT=3000
+NODE_ENV=production
+MONGODB_URI=mongodb+srv://brightenlighting:PASSWORD@cluster.mongodb.net/brightenlighting?retryWrites=true&w=majority
+FRONTEND_URL=https://yourusername.github.io/brightenlighting
+SESSION_SECRET=generate_with_node_-e_command
+ADMIN_USER=admin
+ADMIN_PASS=your_secure_password
+MPESA_ENV=sandbox
+MPESA_CONSUMER_KEY=your_mpesa_key
+MPESA_CONSUMER_SECRET=your_mpesa_secret
+MPESA_SHORTCODE=174379
+MPESA_PASSKEY=your_mpesa_passkey
+MPESA_CALLBACK_URL=https://your-service-name.onrender.com/mpesa/callback
+```
 
-For production:
+**To generate SESSION_SECRET**, run in terminal:
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```
 
-1. Add caching headers to static assets
-2. Enable gzip compression
-3. Use CDN for images (AWS S3, Cloudflare, etc.)
-4. Optimize images (reduce file size)
-5. Monitor response times
-6. Consider load balancing for high traffic
+### Step 5: Deploy
 
-## Scaling Considerations
+1. Click **"Create Web Service"**
+2. Render starts automatic deployment
+3. Wait for **"Live"** status (takes 2-5 minutes)
+4. Note your backend URL: `https://your-service-name.onrender.com`
 
-Current setup works for:
-- Small to medium traffic (< 100 concurrent users)
-- Single server deployments
+**⚠️ Important**: Free tier services sleep after 15 minutes of inactivity. First request takes ~30 seconds to wake up.
 
-For larger scale:
-- Migrate to proper database (MongoDB, PostgreSQL)
-- Implement caching layer (Redis)
-- Use load balancer
-- Separate frontend and backend servers
-- Implement CDN
+---
 
-## Support & Questions
+## Part 3: GitHub Pages Frontend Deployment
 
-- Review error logs in terminal/dashboard
-- Check [ADMIN_GUIDE.md](ADMIN_GUIDE.md) for features
-- Verify all environment variables are set
-- Contact development team with detailed error information
+### Step 1: Create GitHub Pages Repository
 
-## Version History
+**Option A: Using existing repository**
 
-- **v1.0** (2026-05-04): Initial deployment with image gallery picker, stock management, and admin settings
+1. On GitHub, go to your **brightenlighting** repository
+2. Click **Settings** → **Pages**
+3. Under **"Source"**, select `main` branch, `/root` folder
+4. Click **"Save"**
+5. Your site is live at: `https://yourusername.github.io/brightenlighting`
+
+**Option B: Create dedicated Pages repository**
+
+1. Create new repo: `yourusername.github.io`
+2. Copy frontend files (HTML, CSS, JS, assets) to root
+3. Push to main branch
+4. Your site is live at: `https://yourusername.github.io`
+
+### Step 2: Update Frontend API Calls
+
+Edit `script.js` and `contact.html` to use your Render backend:
+
+**In script.js:**
+```javascript
+const API_BASE = 'https://your-service-name.onrender.com';
+
+// Replace all fetch calls like:
+// OLD: fetch('/api/products')
+// NEW: fetch(API_BASE + '/api/products')
+```
+
+### Step 3: Configure CORS on Backend
+
+The backend `index.js` already handles CORS for GitHub Pages. Verify:
+```javascript
+app.use(cors({
+    origin: [FRONTEND_URL, 'http://localhost:3000', 'http://localhost:5500'],
+    credentials: true
+}));
+```
+
+Where `FRONTEND_URL` matches your GitHub Pages domain.
+
+### Step 4: Deploy Frontend
+
+1. Make API URL changes in your files
+2. Commit and push to GitHub:
+```bash
+git add .
+git commit -m "Update API endpoints for Render backend"
+git push origin main
+```
+3. GitHub Pages auto-deploys on push
+4. Your site updates within 30 seconds
+
+---
+
+## Part 4: Testing the Full Stack
+
+### Test Backend Connectivity
+
+1. Open browser console on your GitHub Pages site
+2. Run:
+```javascript
+fetch('https://your-service-name.onrender.com/api/products')
+  .then(r => r.json())
+  .then(d => console.log(d))
+```
+
+3. Should see product list (may take 30 seconds on first request)
+
+### Test Admin Login
+
+1. Go to `https://yourusername.github.io/brightenlighting/login.html`
+2. Login with credentials from `.env`:
+   - Username: `admin`
+   - Password: `your_secure_password`
+3. Should redirect to admin dashboard
+
+### Test Product Management
+
+1. In admin dashboard, add/edit/delete a product
+2. Go to public site
+3. Verify changes appear
+
+### Test M-Pesa Payment
+
+1. On product page, click "Buy Now"
+2. Enter phone number: `0712345678`
+3. Enter amount: `100`
+4. Should show M-Pesa STK prompt (sandbox mode)
+
+---
+
+## Environment Variables Reference
+
+| Variable | Purpose | Example |
+|----------|---------|---------|
+| `MONGODB_URI` | Database connection | `mongodb+srv://...` |
+| `FRONTEND_URL` | GitHub Pages domain | `https://user.github.io/repo` |
+| `ADMIN_USER` | Admin username | `admin` |
+| `ADMIN_PASS` | Admin password (min 6 chars) | `SecurePass123!` |
+| `SESSION_SECRET` | Session encryption key | Generated via Node |
+| `MPESA_CONSUMER_KEY` | M-Pesa API key | From Safaricom |
+| `MPESA_CONSUMER_SECRET` | M-Pesa API secret | From Safaricom |
+| `MPESA_CALLBACK_URL` | M-Pesa callback URL | Your Render URL + `/mpesa/callback` |
+| `NODE_ENV` | Environment | `production` |
+
+---
+
+## Monitoring & Maintenance
+
+### Check Backend Status
+- Render Dashboard: https://dashboard.render.com
+- Look for **"Live"** status indicator
+- View logs: Click service → scroll to "Logs"
+
+### View Database
+1. MongoDB Atlas → Clusters → "Collections"
+2. Browse documents in:
+   - `adminsettings` - Admin credentials
+   - `products` - Product catalog
+   - `orders` - M-Pesa payments
+
+### Common Issues
+
+**Backend returning 503?**
+- Free tier service may be sleeping. First request takes time to wake.
+
+**CORS errors in console?**
+- Verify `FRONTEND_URL` matches your GitHub Pages URL exactly
+- Check `origin` array in `index.js`
+
+**Can't login to admin?**
+- Verify `ADMIN_USER` and `ADMIN_PASS` in Render env vars
+- Check MongoDB connection by viewing logs
+
+**Products not showing?**
+- Go to admin dashboard, add at least one product
+- Verify MongoDB connection string is correct
+
+---
+
+## Upgrading from Free Tier
+
+### MongoDB Atlas Upgrade
+- Free: 512MB storage, shared cluster
+- $57/month: Dedicated 2GB M2 cluster
+- Scales up with your data needs
+
+### Render Backend Upgrade
+- Free: 100GB bandwidth/month, sleeps after 15min
+- $7/month: 1GB RAM, always-on instance
+- Better for high-traffic sites
+
+### GitHub Pages
+- Always free for public repositories
+- $21/month for private repo hosting (or use separate hosting)
+
+---
+
+## Troubleshooting Checklist
+
+- [ ] MongoDB Atlas cluster is green/running
+- [ ] Database user created with correct password
+- [ ] Network Access allows connections (or specific IPs)
+- [ ] Render environment variables all set correctly
+- [ ] Render build logs show successful deployment
+- [ ] MPESA_CALLBACK_URL uses your Render service URL
+- [ ] GitHub Pages source is set to `main` branch
+- [ ] Frontend API calls use your Render backend URL
+- [ ] CORS origin settings include your GitHub Pages domain
+
+---
+
+## Next Steps
+
+1. **Custom Domain** (optional)
+   - Render: Add custom domain in settings
+   - GitHub Pages: Add CNAME file to repo
+   
+2. **SSL Certificates** (automatic)
+   - Both Render and GitHub Pages include free HTTPS
+
+3. **Monitoring**
+   - Set up uptime monitoring (e.g., UptimeRobot)
+   - Monitor MongoDB usage in Atlas dashboard
+
+4. **Backups**
+   - MongoDB Atlas: Enable automatic backups
+   - GitHub: Push code regularly
+
+---
+
+**Deployment Summary**
+- ✅ GitHub Pages: Free, instant deploy
+- ✅ Render: Free backend, auto-scales
+- ✅ MongoDB: Free 512MB, perfect for growth
+- ✅ No credit card required
+- ✅ Scale up when needed
+
+Good luck with Brighten Lighting! 🎉

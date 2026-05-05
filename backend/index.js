@@ -5,22 +5,62 @@ const cors = require('cors');
 const crypto = require('crypto');
 const express = require('express');
 const session = require('express-session');
-const fs = require('fs/promises');
+const mongoose = require('mongoose');
 const path = require('path');
 
 const app = express();
 const projectRoot = path.resolve(__dirname, '..');
 const privateAdminFile = path.join(__dirname, 'private', 'admin.html');
-const dataDir = path.join(__dirname, 'data');
-const adminFile = path.join(dataDir, 'admin.json');
-const productsFile = path.join(dataDir, 'products.json');
-const ordersFile = path.join(dataDir, 'orders.json');
 
 const PORT = process.env.PORT || 3000;
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 const ADMIN_USER = process.env.ADMIN_USER || 'admin';
 const ADMIN_PASS = process.env.ADMIN_PASS || 'password123';
 const SESSION_SECRET = process.env.SESSION_SECRET || 'brighten-store-secret';
 const MPESA_ENV = process.env.MPESA_ENV === 'production' ? 'production' : 'sandbox';
+const MONGODB_URI = process.env.MONGODB_URI;
+
+// MongoDB Schemas
+const adminSettingsSchema = new mongoose.Schema({
+    username: { type: String, required: true, unique: true },
+    passwordSalt: { type: String, required: true },
+    passwordHash: { type: String, required: true },
+    createdAt: { type: Date, default: Date.now },
+    updatedAt: { type: Date, default: Date.now },
+});
+
+const productSchema = new mongoose.Schema({
+    id: { type: String, required: true, unique: true },
+    name: { type: String, required: true },
+    category: { type: String, required: true },
+    price: { type: Number, required: true },
+    image: { type: String, default: '/assets/decorative-luxury-cluster.jpg' },
+    description: { type: String, default: '' },
+    featured: { type: Boolean, default: false },
+    publicVisible: { type: Boolean, default: true },
+    stock: { type: Number, default: 0 },
+    createdAt: { type: Date, default: Date.now },
+    updatedAt: { type: Date, default: Date.now },
+});
+
+const orderSchema = new mongoose.Schema({
+    id: { type: String, required: true, unique: true },
+    source: { type: String, enum: ['mpesa'], required: true },
+    status: { type: String, default: 'successful' },
+    merchantRequestId: String,
+    checkoutRequestId: String,
+    receiptNumber: String,
+    amount: Number,
+    phoneNumber: String,
+    transactionDate: String,
+    resultDesc: String,
+    receivedAt: { type: Date, default: Date.now },
+    raw: mongoose.Schema.Types.Mixed,
+});
+
+const AdminSettings = mongoose.model('AdminSettings', adminSettingsSchema);
+const Product = mongoose.model('Product', productSchema);
+const Order = mongoose.model('Order', orderSchema);
 
 const endpoints = {
     sandbox: {
@@ -43,8 +83,6 @@ const defaultProducts = [
         description: 'Modern statement decorative pendant cluster',
         featured: true,
         stock: 8,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
     },
     {
         id: 'prod-pendant-trio',
@@ -55,8 +93,6 @@ const defaultProducts = [
         description: 'Warm interior pendant set for dining and counters',
         featured: true,
         stock: 4,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
     },
     {
         id: 'prod-ceiling-panel',
@@ -67,8 +103,6 @@ const defaultProducts = [
         description: 'Slim overhead lighting for clean modern rooms',
         featured: true,
         stock: 6,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
     },
     {
         id: 'prod-wall-sconce',
@@ -79,8 +113,6 @@ const defaultProducts = [
         description: 'Ambient wall lighting for hallways and lounges',
         featured: false,
         stock: 10,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
     },
     {
         id: 'prod-outdoor-path',
@@ -91,82 +123,13 @@ const defaultProducts = [
         description: 'Weather-ready exterior lighting for entrances and paths',
         featured: false,
         stock: 7,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
     },
 ];
-
-const defaultAdminSettings = (username = ADMIN_USER, password = ADMIN_PASS) => {
-    const salt = crypto.randomBytes(16).toString('hex');
-
-    return {
-        username,
-        passwordSalt: salt,
-        passwordHash: crypto.scryptSync(password, salt, 64).toString('hex'),
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-    };
-};
 
 let cachedToken = null;
 let tokenExpiresAt = 0;
 
-const ensureFile = async (filePath, fallback) => {
-    await fs.mkdir(path.dirname(filePath), { recursive: true });
-    try {
-        await fs.access(filePath);
-    } catch {
-        await fs.writeFile(filePath, JSON.stringify(fallback, null, 2), 'utf8');
-    }
-};
-
-const readJson = async (filePath, fallback) => {
-    try {
-        const raw = await fs.readFile(filePath, 'utf8');
-        if (!raw.trim()) {
-            return fallback;
-        }
-        return JSON.parse(raw);
-    } catch (error) {
-        if (error.code === 'ENOENT') {
-            await ensureFile(filePath, fallback);
-            return fallback;
-        }
-        throw error;
-    }
-};
-
-const writeJson = async (filePath, value) => {
-    const tempFile = `${filePath}.tmp`;
-    await fs.writeFile(tempFile, JSON.stringify(value, null, 2), 'utf8');
-    await fs.rename(tempFile, filePath);
-};
-
-const ensureDataStores = async () => {
-    await ensureFile(adminFile, defaultAdminSettings());
-    await ensureFile(productsFile, defaultProducts);
-    await ensureFile(ordersFile, []);
-};
-
-const getAdminSettings = async () => {
-    const settings = await readJson(adminFile, defaultAdminSettings());
-
-    if (!settings.username || !settings.passwordSalt || !settings.passwordHash) {
-        const fallback = defaultAdminSettings();
-        await writeJson(adminFile, fallback);
-        return fallback;
-    }
-
-    return settings;
-};
-
-const saveAdminSettings = async (settings) => writeJson(adminFile, settings);
-
-const getProducts = async () => readJson(productsFile, defaultProducts);
-const saveProducts = async (products) => writeJson(productsFile, products);
-const getOrders = async () => readJson(ordersFile, []);
-const saveOrders = async (orders) => writeJson(ordersFile, orders);
-
+// Utility Functions
 const verifyPassword = (password, settings) => {
     if (!settings?.passwordSalt || !settings?.passwordHash) {
         return false;
@@ -231,8 +194,6 @@ const normalizeProductPayload = (payload, existingProduct = null) => {
                     ? existingProduct?.publicVisible ?? true
                     : Boolean(payload.publicVisible),
             stock: Number.isFinite(stock) ? Math.max(0, Math.trunc(stock)) : existingProduct?.stock || 0,
-            createdAt: existingProduct?.createdAt || new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
         },
     };
 };
@@ -262,7 +223,6 @@ const buildOrderFromCallback = (callbackBody) => {
         phoneNumber: String(metadata.PhoneNumber || metadata.PartyA || ''),
         transactionDate: metadata.TransactionDate || null,
         resultDesc: callback.ResultDesc || 'Success',
-        receivedAt: new Date().toISOString(),
         raw: callbackBody,
     };
 };
@@ -302,7 +262,11 @@ const requireAdmin = (req, res, next) => {
     return res.status(401).json({ error: 'Unauthorized' });
 };
 
-app.use(cors({ origin: true, credentials: true }));
+// Middleware
+app.use(cors({
+    origin: [FRONTEND_URL, 'http://localhost:3000', 'http://localhost:5500'],
+    credentials: true
+}));
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(
@@ -313,7 +277,7 @@ app.use(
         cookie: {
             httpOnly: true,
             sameSite: 'lax',
-            secure: false,
+            secure: process.env.NODE_ENV === 'production',
             maxAge: 60 * 60 * 1000,
         },
     })
@@ -323,12 +287,12 @@ app.use((req, res, next) => {
     if (req.path.startsWith('/backend')) {
         return res.status(404).end();
     }
-
     return next();
 });
 
 app.use(express.static(projectRoot, { index: false, extensions: ['html'] }));
 
+// Routes
 app.get('/', async (req, res, next) => {
     try {
         return res.sendFile(path.join(projectRoot, 'index.html'));
@@ -343,8 +307,8 @@ app.get('/api/session', (req, res) => {
 
 app.get('/api/admin/settings', requireAdmin, async (req, res, next) => {
     try {
-        const settings = await getAdminSettings();
-        return res.json({ username: settings.username });
+        const settings = await AdminSettings.findOne({});
+        return res.json({ username: settings?.username || ADMIN_USER });
     } catch (error) {
         return next(error);
     }
@@ -355,7 +319,17 @@ app.post('/api/admin/login', async (req, res) => {
     const password = String(req.body?.password || '').trim();
 
     try {
-        const settings = await getAdminSettings();
+        let settings = await AdminSettings.findOne({});
+
+        if (!settings) {
+            // Initialize with defaults if not exists
+            const { passwordSalt, passwordHash } = hashPassword(ADMIN_PASS);
+            settings = await AdminSettings.create({
+                username: ADMIN_USER,
+                passwordSalt,
+                passwordHash,
+            });
+        }
 
         if (username !== settings.username || !verifyPassword(password, settings)) {
             return res.status(401).json({ error: 'Invalid credentials' });
@@ -382,7 +356,12 @@ app.put('/api/admin/settings', requireAdmin, async (req, res, next) => {
         const nextPassword = String(req.body?.newPassword || '').trim();
         const confirmPassword = String(req.body?.confirmPassword || '').trim();
 
-        const settings = await getAdminSettings();
+        let settings = await AdminSettings.findOne({});
+
+        if (!settings) {
+            return res.status(500).json({ error: 'Admin settings not found' });
+        }
+
         if (!verifyPassword(currentPassword, settings)) {
             return res.status(401).json({ error: 'Current password is incorrect' });
         }
@@ -406,14 +385,12 @@ app.put('/api/admin/settings', requireAdmin, async (req, res, next) => {
                 passwordHash: settings.passwordHash,
             };
 
-        const updatedSettings = {
-            ...settings,
-            username: nextUsername,
-            ...passwordUpdate,
-            updatedAt: new Date().toISOString(),
-        };
+        settings.username = nextUsername;
+        settings.passwordSalt = passwordUpdate.passwordSalt;
+        settings.passwordHash = passwordUpdate.passwordHash;
+        settings.updatedAt = new Date();
+        await settings.save();
 
-        await saveAdminSettings(updatedSettings);
         req.session.adminUser = nextUsername;
 
         return res.json({ ok: true, username: nextUsername, passwordChanged: Boolean(nextPassword) });
@@ -439,13 +416,10 @@ app.get(['/admin', '/admin/'], requireAdmin, (req, res) => {
 
 app.get('/api/products', async (req, res, next) => {
     try {
-        const products = await getProducts();
-        const publicProducts = products
-            .filter((product) => product.publicVisible !== false && Number(product.stock ?? 0) > 0)
-            .sort(
-                (left, right) => Number(right.featured) - Number(left.featured) || left.name.localeCompare(right.name)
-            );
-        return res.json(publicProducts);
+        const products = await Product.find({ publicVisible: true, stock: { $gt: 0 } })
+            .sort({ featured: -1, name: 1 })
+            .lean();
+        return res.json(products);
     } catch (error) {
         return next(error);
     }
@@ -453,7 +427,8 @@ app.get('/api/products', async (req, res, next) => {
 
 app.get('/api/admin/products', requireAdmin, async (req, res, next) => {
     try {
-        return res.json(await getProducts());
+        const products = await Product.find().sort({ createdAt: -1 }).lean();
+        return res.json(products);
     } catch (error) {
         return next(error);
     }
@@ -461,16 +436,14 @@ app.get('/api/admin/products', requireAdmin, async (req, res, next) => {
 
 app.post('/api/admin/products', requireAdmin, async (req, res, next) => {
     try {
-        const currentProducts = await getProducts();
         const normalized = normalizeProductPayload(req.body);
 
         if (normalized.error) {
             return res.status(400).json({ error: normalized.error });
         }
 
-        currentProducts.unshift(normalized.product);
-        await saveProducts(currentProducts);
-        return res.status(201).json(normalized.product);
+        const product = await Product.create(normalized.product);
+        return res.status(201).json(product);
     } catch (error) {
         return next(error);
     }
@@ -478,21 +451,22 @@ app.post('/api/admin/products', requireAdmin, async (req, res, next) => {
 
 app.put('/api/admin/products/:id', requireAdmin, async (req, res, next) => {
     try {
-        const currentProducts = await getProducts();
-        const index = currentProducts.findIndex((product) => product.id === req.params.id);
+        const product = await Product.findOne({ id: req.params.id });
 
-        if (index === -1) {
+        if (!product) {
             return res.status(404).json({ error: 'Product not found' });
         }
 
-        const normalized = normalizeProductPayload(req.body, currentProducts[index]);
+        const normalized = normalizeProductPayload(req.body, product);
         if (normalized.error) {
             return res.status(400).json({ error: normalized.error });
         }
 
-        currentProducts[index] = normalized.product;
-        await saveProducts(currentProducts);
-        return res.json(normalized.product);
+        Object.assign(product, normalized.product);
+        product.updatedAt = new Date();
+        await product.save();
+
+        return res.json(product);
     } catch (error) {
         return next(error);
     }
@@ -500,14 +474,12 @@ app.put('/api/admin/products/:id', requireAdmin, async (req, res, next) => {
 
 app.delete('/api/admin/products/:id', requireAdmin, async (req, res, next) => {
     try {
-        const currentProducts = await getProducts();
-        const filteredProducts = currentProducts.filter((product) => product.id !== req.params.id);
+        const result = await Product.deleteOne({ id: req.params.id });
 
-        if (filteredProducts.length === currentProducts.length) {
+        if (result.deletedCount === 0) {
             return res.status(404).json({ error: 'Product not found' });
         }
 
-        await saveProducts(filteredProducts);
         return res.json({ ok: true });
     } catch (error) {
         return next(error);
@@ -516,11 +488,8 @@ app.delete('/api/admin/products/:id', requireAdmin, async (req, res, next) => {
 
 app.get('/api/admin/orders', requireAdmin, async (req, res, next) => {
     try {
-        const orders = await getOrders();
-        const sortedOrders = [...orders].sort(
-            (left, right) => new Date(right.receivedAt || 0) - new Date(left.receivedAt || 0)
-        );
-        return res.json(sortedOrders);
+        const orders = await Order.find().sort({ receivedAt: -1 }).lean();
+        return res.json(orders);
     } catch (error) {
         return next(error);
     }
@@ -576,9 +545,7 @@ app.post('/mpesa/callback', async (req, res) => {
     try {
         const order = buildOrderFromCallback(req.body);
         if (order) {
-            const currentOrders = await getOrders();
-            currentOrders.unshift(order);
-            await saveOrders(currentOrders);
+            await Order.create(order);
         }
 
         return res.json({ received: true });
@@ -591,14 +558,15 @@ app.post('/mpesa/callback', async (req, res) => {
 app.get('/api/gallery', async (req, res, next) => {
     try {
         const assetsDir = path.join(projectRoot, 'assets');
+        const fs = require('fs').promises;
         const files = await fs.readdir(assetsDir, { withFileTypes: true });
-        
+
         const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
         const images = files
             .filter((file) => file.isFile() && imageExtensions.includes(path.extname(file.name).toLowerCase()))
             .map((file) => `/assets/${file.name}`)
             .sort();
-        
+
         return res.json(images);
     } catch (error) {
         console.error('Gallery error:', error);
@@ -612,20 +580,59 @@ app.get('/api/gallery', async (req, res, next) => {
     }
 });
 
+// Error handler
 app.use((error, req, res, next) => {
     console.error(error);
     if (res.headersSent) {
         return next(error);
     }
-    return res.status(500).json({ error: 'Server error' });
+    return res.status(500).json({ error: 'Server error', detail: error.message });
 });
 
+// Initialize database and start server
 const start = async () => {
-    await ensureDataStores();
-    app.listen(PORT, () => console.log(`Brighten Lighting server running on port ${PORT}`));
+    try {
+        if (!MONGODB_URI) {
+            throw new Error('MONGODB_URI environment variable is required');
+        }
+
+        await mongoose.connect(MONGODB_URI);
+        console.log('✅ Connected to MongoDB');
+
+        // Initialize products if none exist
+        const productCount = await Product.countDocuments();
+        if (productCount === 0) {
+            await Product.insertMany(defaultProducts);
+            console.log('✅ Initialized default products');
+        }
+
+        // Initialize admin settings if not exists
+        const adminExists = await AdminSettings.findOne({});
+        if (!adminExists) {
+            const { passwordSalt, passwordHash } = hashPassword(ADMIN_PASS);
+            await AdminSettings.create({
+                username: ADMIN_USER,
+                passwordSalt,
+                passwordHash,
+            });
+            console.log('✅ Initialized admin settings');
+        }
+
+        app.listen(PORT, () => {
+            console.log(`\n🎉 Brighten Lighting server running on port ${PORT}`);
+            console.log(`📍 Frontend: ${FRONTEND_URL}`);
+            console.log(`🗄️  Database: MongoDB Atlas\n`);
+        });
+    } catch (error) {
+        console.error('❌ Failed to start server:', error.message);
+        process.exit(1);
+    }
 };
 
-start().catch((error) => {
-    console.error('Failed to start server', error);
-    process.exit(1);
+// Handle shutdown
+process.on('SIGINT', async () => {
+    await mongoose.disconnect();
+    process.exit(0);
 });
+
+start();

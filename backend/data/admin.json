@@ -1,0 +1,7 @@
+{
+  "username": "admin",
+  "passwordSalt": "93a92a7c7f462080d126b251f6032b1e",
+  "passwordHash": "c7ab4baa7896168a493ace9645da1f84b5b9d533a9c1008afdd3ae72e41a32e870748eb30a773ea10d2488316c92a9fcaeb2eff8d6e70773f3cdb5da5a0bbecb",
+  "createdAt": "2026-05-04T04:29:39.500Z",
+  "updatedAt": "2026-05-04T04:29:39.500Z"
+}

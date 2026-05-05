@@ -1,16 +1,21 @@
 {
   "name": "brightenlighting-mpesa-backend",
-  "version": "0.1.0",
-  "description": "Minimal backend to perform Safaricom Daraja M-Pesa STK Push for Brighten Lighting",
+  "version": "1.0.0",
+  "description": "Brighten Lighting backend with MongoDB integration and M-Pesa support",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "dev": "NODE_ENV=development node index.js"
+  },
+  "engines": {
+    "node": ">=16.0.0"
   },
   "dependencies": {
     "axios": "^1.6.0",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
-    "express-session": "^1.18.1"
+    "express-session": "^1.18.1",
+    "mongoose": "^7.5.0"
   }
 }

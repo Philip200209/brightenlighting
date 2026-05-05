@@ -1,5 +1,18 @@
 [
   {
+    "id": "prod-99b85574-2657-4bb6-9f34-6d8819886fc8",
+    "name": "outdoor",
+    "category": "outdoor",
+    "price": 4500,
+    "image": "/assets/outdoor-light.jpg",
+    "description": "",
+    "featured": true,
+    "publicVisible": true,
+    "stock": 3,
+    "createdAt": "2026-05-04T05:18:22.356Z",
+    "updatedAt": "2026-05-04T05:18:22.356Z"
+  },
+  {
     "id": "prod-decorative-cluster",
     "name": "Decorative Cluster Pendant",
     "category": "decorative",
@@ -15,13 +28,14 @@
     "id": "prod-pendant-trio",
     "name": "Pendant Light Trio",
     "category": "pendant",
-    "price": 5099,
+    "price": 7500,
     "image": "/assets/pendant-light.jpg",
     "description": "Warm interior pendant set for dining and counters",
     "featured": true,
+    "publicVisible": true,
     "stock": 4,
     "createdAt": "2026-04-30T00:00:00.000Z",
-    "updatedAt": "2026-05-02T06:53:12.415Z"
+    "updatedAt": "2026-05-04T06:05:30.276Z"
   },
   {
     "id": "prod-ceiling-panel",
