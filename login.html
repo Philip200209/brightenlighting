@@ -117,7 +117,6 @@
         <script src="script.js"></script>
         <script>
             const API_BASE = 'https://brighten-lighting-api.onrender.com';
-            const TOKEN_KEY = 'adminToken';
             const form = document.querySelector('#loginForm');
             const message = document.querySelector('#loginMessage');
 
@@ -127,7 +126,7 @@
                 message.style.color = isError ? '#ff9c9c' : 'var(--gold-bright)';
             };
 
-            const getToken = () => localStorage.getItem(TOKEN_KEY);
+            const getToken = () => localStorage.getItem('token');
 
             const redirectIfLoggedIn = () => {
                 if (getToken()) {
@@ -156,12 +155,11 @@
                     console.log('Login response data:', data);
 
                     if (response.ok && data.token) {
-                        // Store token in localStorage
-                        localStorage.setItem(TOKEN_KEY, data.token);
                         setMessage('Login successful! Redirecting...', false);
                         
+                        // Redirect with token in URL hash (cross-domain compatible)
                         setTimeout(() => {
-                            window.location.href = `${API_BASE}/admin`;
+                            window.location.href = `${API_BASE}/admin#token=${encodeURIComponent(data.token)}`;
                         }, 500);
                         return;
                     }

@@ -639,17 +639,34 @@
           .replaceAll('"', '&quot;')
           .replaceAll("'", '&#39;');
 
-      const TOKEN_KEY = 'adminToken';
-      const getToken = () => localStorage.getItem(TOKEN_KEY);
-      const clearToken = () => localStorage.removeItem(TOKEN_KEY);
+      let token = null;
 
-      // Redirect to login if no token
-      if (!getToken()) {
-        window.location.href = 'https://brighten-lighting-api.onrender.com/login.html';
+      // Check for token in URL hash (from login redirect)
+      if (window.location.hash.startsWith('#token=')) {
+        token = decodeURIComponent(window.location.hash.replace('#token=', ''));
+        // Clean URL immediately (remove hash)
+        history.replaceState({}, document.title, window.location.pathname);
+        // Save for page refreshes
+        localStorage.setItem('token', token);
+        console.log('✅ Token from URL hash stored');
+      } else {
+        // Fall back to localStorage (for page refreshes)
+        token = localStorage.getItem('token');
+        console.log('✅ Token from localStorage retrieved');
       }
 
+      if (!token) {
+        console.log('❌ No token found, redirecting to login');
+        window.location.href = 'https://philip200209.github.io/brightenlighting/login.html';
+        throw new Error('No authentication token');
+      }
+
+      const clearToken = () => {
+        localStorage.removeItem('token');
+        token = null;
+      };
+
       const apiFetch = async (url, options = {}) => {
-        const token = getToken();
         const response = await fetch(url, {
           credentials: 'include',
           headers: {
