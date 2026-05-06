@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - Brighten Lighting</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #0f1419 0%, #1a1f2e 100%);
+        }
+        .login-container {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 215, 0, 0.05) 100%);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+        }
+        .input-field {
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            color: #e0e0e0;
+        }
+        .input-field:focus {
+            background-color: rgba(255, 255, 255, 0.08);
+            border-color: #FFD700;
+            outline: none;
+            box-shadow: 0 0 8px rgba(255, 215, 0, 0.2);
+        }
+        .btn-login {
+            background-color: #FFD700;
+            color: #000;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .btn-login:hover {
+            background-color: #ffd700cc;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+    <div class="w-full max-w-md">
+        <!-- Logo -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-yellow-500 mb-2">BRIGHTEN</h1>
+            <p class="text-gray-400">Admin Portal</p>
+        </div>
+
+        <!-- Login Card -->
+        <div class="login-container rounded-lg p-8">
+            <h2 class="text-2xl font-bold text-white mb-6 text-center">Welcome Back</h2>
+            
+            <div id="errorMessage" class="bg-red-500/20 border border-red-500/50 text-red-200 px-4 py-3 rounded-lg mb-4 hidden">
+                Invalid credentials. Please try again.
+            </div>
+
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="mb-4">
+                    <label class="block text-gray-300 text-sm font-medium mb-2">Username</label>
+                    <input 
+                        type="text" 
+                        id="username" 
+                        placeholder="admin" 
+                        class="input-field w-full px-4 py-3 rounded-lg"
+                        required
+                    >
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-gray-300 text-sm font-medium mb-2">Password</label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        placeholder="••••••••" 
+                        class="input-field w-full px-4 py-3 rounded-lg"
+                        required
+                    >
+                </div>
+
+                <button type="submit" class="btn-login w-full py-3 rounded-lg font-semibold mb-4">
+                    Sign In
+                </button>
+            </form>
+
+            <div class="text-center text-gray-400 text-sm">
+                <p>Demo Credentials:</p>
+                <p>Username: <code class="text-yellow-400">admin</code></p>
+                <p>Password: <code class="text-yellow-400">admin123</code></p>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center mt-8 text-gray-500 text-sm">
+            <p>© 2026 Brighten Lighting. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://brighten-lighting-api.onrender.com';
+
+        async function handleLogin(event) {
+            event.preventDefault();
+
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorMessage = document.getElementById('errorMessage');
+
+            try {
+                const response = await fetch(`${API_BASE}/api/admin/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password }),
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.token) {
+                    // Redirect with token in URL hash
+                    window.location.href = `${API_BASE}/admin-dashboard.html#token=${encodeURIComponent(data.token)}`;
+                } else {
+                    errorMessage.classList.remove('hidden');
+                    console.error('Login failed:', data.error);
+                }
+            } catch (error) {
+                errorMessage.textContent = `Error: ${error.message}`;
+                errorMessage.classList.remove('hidden');
+                console.error('Login error:', error);
+            }
+        }
+
+        // Allow Enter to submit
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('password').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    document.getElementById('loginForm').dispatchEvent(new Event('submit'));
+                }
+            });
+        });
+    </script>
+</body>
+</html>

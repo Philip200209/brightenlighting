@@ -251,6 +251,39 @@ app.get('/api/products', async (req, res, next) => {
     }
 });
 
+// ===== ADMIN LOGIN =====
+app.post('/api/admin/login', async (req, res) => {
+    const username = String(req.body?.username || '').trim();
+    const password = String(req.body?.password || '').trim();
+
+    // Hardcoded credentials for demo (use env vars in production)
+    const ADMIN_USER = process.env.ADMIN_USER || 'admin';
+    const ADMIN_PASS = process.env.ADMIN_PASS || 'admin123';
+
+    if (username === ADMIN_USER && password === ADMIN_PASS) {
+        // Generate token
+        const token = crypto.randomBytes(32).toString('hex');
+        
+        console.log(`✅ Admin login successful for user: ${username}`);
+        return res.json({ 
+            ok: true, 
+            token: token,
+            user: username 
+        });
+    }
+
+    return res.status(401).json({ error: 'Invalid credentials' });
+});
+
+// ===== SERVE ADMIN PAGES =====
+app.get('/admin-dashboard.html', (req, res) => {
+    return res.sendFile(path.join(projectRoot, 'admin-dashboard.html'));
+});
+
+app.get('/admin-login.html', (req, res) => {
+    return res.sendFile(path.join(projectRoot, 'admin-login.html'));
+});
+
 app.post('/stkpush', async (req, res) => {
     try {
         const phone = normalizePhone(req.body?.phone);
