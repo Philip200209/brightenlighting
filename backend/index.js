@@ -345,7 +345,14 @@ app.post('/api/admin/login', async (req, res) => {
 
             req.session.isAdmin = true;
             req.session.adminUser = username;
-            return res.json({ ok: true });
+            
+            // Explicitly save session to ensure cookie is sent
+            req.session.save((saveError) => {
+                if (saveError) {
+                    return res.status(500).json({ error: 'Unable to save session' });
+                }
+                return res.json({ ok: true });
+            });
         });
     } catch (error) {
         return res.status(500).json({ error: 'Unable to read admin settings', detail: error.message });
