@@ -225,33 +225,8 @@ app.use((req, res, next) => {
     return next();
 });
 
-app.use(express.static(projectRoot, { index: false, extensions: ['html'] }));
-
-// Routes
-app.get('/', async (req, res, next) => {
-    try {
-        return res.sendFile(path.join(projectRoot, 'index.html'));
-    } catch (error) {
-        return next(error);
-    }
-});
-
-
-
-
-
-app.get('/api/products', async (req, res, next) => {
-    try {
-        const products = await Product.find({ publicVisible: true, stock: { $gt: 0 } })
-            .sort({ featured: -1, name: 1 })
-            .lean();
-        return res.json(products);
-    } catch (error) {
-        return next(error);
-    }
-});
-
-// ===== ADMIN LOGIN =====
+// ===== ADMIN ROUTES (before static middleware) =====
+// ===== ADMIN LOGIN ENDPOINT =====
 app.post('/api/admin/login', async (req, res) => {
     const username = String(req.body?.username || '').trim();
     const password = String(req.body?.password || '').trim();
@@ -537,6 +512,31 @@ app.get('/admin-dashboard', (req, res) => {
     return res.type('html').send(html);
 });
 
+app.use(express.static(projectRoot, { index: false, extensions: ['html'] }));
+
+// Routes
+app.get('/', async (req, res, next) => {
+    try {
+        return res.sendFile(path.join(projectRoot, 'index.html'));
+    } catch (error) {
+        return next(error);
+    }
+});
+
+
+
+
+
+app.get('/api/products', async (req, res, next) => {
+    try {
+        const products = await Product.find({ publicVisible: true, stock: { $gt: 0 } })
+            .sort({ featured: -1, name: 1 })
+            .lean();
+        return res.json(products);
+    } catch (error) {
+        return next(error);
+    }
+
 app.post('/stkpush', async (req, res) => {
     try {
         const phone = normalizePhone(req.body?.phone);
@@ -646,18 +646,6 @@ const start = async () => {
         if (productCount === 0) {
             await Product.insertMany(defaultProducts);
             console.log('✅ Initialized default products');
-        }
-
-        // Initialize admin settings if not exists
-        const adminExists = await AdminSettings.findOne({});
-        if (!adminExists) {
-            const { passwordSalt, passwordHash } = hashPassword(ADMIN_PASS);
-            await AdminSettings.create({
-                username: ADMIN_USER,
-                passwordSalt,
-                passwordHash,
-            });
-            console.log('✅ Initialized admin settings');
         }
 
         app.listen(PORT, () => {
