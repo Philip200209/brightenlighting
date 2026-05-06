@@ -116,6 +116,7 @@
 
         <script src="script.js"></script>
         <script>
+            const API_BASE = 'https://brighten-lighting-api.onrender.com';
             const form = document.querySelector('#loginForm');
             const message = document.querySelector('#loginMessage');
 
@@ -127,10 +128,12 @@
 
             const redirectIfLoggedIn = async () => {
                 try {
-                    const response = await fetch('/api/session');
+                    const response = await fetch(`${API_BASE}/api/session`, {
+                        credentials: 'include',
+                    });
                     const session = await response.json();
                     if (session.loggedIn) {
-                        window.location.href = '/admin';
+                        window.location.href = `${API_BASE}/admin`;
                     }
                 } catch {
                     // Stay on the login page if the session check fails.
@@ -143,14 +146,15 @@
                 const username = document.querySelector('#user').value.trim();
                 const password = document.querySelector('#pass').value;
 
-                const response = await fetch('/api/admin/login', {
+                const response = await fetch(`${API_BASE}/api/admin/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
                     body: JSON.stringify({ username, password }),
                 });
 
                 if (response.ok) {
-                    window.location.href = '/admin';
+                    window.location.href = `${API_BASE}/admin`;
                     return;
                 }
 
