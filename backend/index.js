@@ -10,25 +10,14 @@ const path = require('path');
 
 const app = express();
 const projectRoot = path.resolve(__dirname, '..');
-const privateAdminFile = path.join(__dirname, 'private', 'admin.html');
 
 const PORT = process.env.PORT || 3000;
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
-const ADMIN_USER = process.env.ADMIN_USER || 'admin';
-const ADMIN_PASS = process.env.ADMIN_PASS || 'password123';
 const SESSION_SECRET = process.env.SESSION_SECRET || 'brighten-store-secret';
 const MPESA_ENV = process.env.MPESA_ENV === 'production' ? 'production' : 'sandbox';
 const MONGODB_URI = process.env.MONGODB_URI;
 
 // MongoDB Schemas
-const adminSettingsSchema = new mongoose.Schema({
-    username: { type: String, required: true, unique: true },
-    passwordSalt: { type: String, required: true },
-    passwordHash: { type: String, required: true },
-    createdAt: { type: Date, default: Date.now },
-    updatedAt: { type: Date, default: Date.now },
-});
-
 const productSchema = new mongoose.Schema({
     id: { type: String, required: true, unique: true },
     name: { type: String, required: true },
@@ -58,16 +47,8 @@ const orderSchema = new mongoose.Schema({
     raw: mongoose.Schema.Types.Mixed,
 });
 
-const adminTokenSchema = new mongoose.Schema({
-    token: { type: String, required: true, unique: true },
-    adminUser: { type: String, required: true },
-    createdAt: { type: Date, default: Date.now, expires: 86400 }, // 24 hour TTL
-});
-
-const AdminSettings = mongoose.model('AdminSettings', adminSettingsSchema);
 const Product = mongoose.model('Product', productSchema);
 const Order = mongoose.model('Order', orderSchema);
-const AdminToken = mongoose.model('AdminToken', adminTokenSchema);
 
 const endpoints = {
     sandbox: {
@@ -137,22 +118,6 @@ let cachedToken = null;
 let tokenExpiresAt = 0;
 
 // Utility Functions
-const verifyPassword = (password, settings) => {
-    if (!settings?.passwordSalt || !settings?.passwordHash) {
-        return false;
-    }
-
-    const testHash = crypto.scryptSync(String(password), settings.passwordSalt, 64);
-    const storedHash = Buffer.from(settings.passwordHash, 'hex');
-
-    return storedHash.length === testHash.length && crypto.timingSafeEqual(storedHash, testHash);
-};
-
-const hashPassword = (password, salt = crypto.randomBytes(16).toString('hex')) => ({
-    passwordSalt: salt,
-    passwordHash: crypto.scryptSync(String(password), salt, 64).toString('hex'),
-});
-
 const formatTimestamp = (date = new Date()) => {
     const pad = (value) => String(value).padStart(2, '0');
     return [
@@ -175,34 +140,6 @@ const normalizePhone = (raw) => {
         value = `254${value}`;
     }
     return /^[0-9]{12}$/.test(value) ? value : null;
-};
-
-const normalizeProductPayload = (payload, existingProduct = null) => {
-    const name = String(payload.name || '').trim();
-    const category = String(payload.category || '').trim().toLowerCase();
-    const price = Number(payload.price);
-    const stock = Number(payload.stock);
-
-    if (!name || !category || !Number.isFinite(price) || price <= 0) {
-        return { error: 'name, category, and a valid price are required' };
-    }
-
-    return {
-        product: {
-            id: existingProduct?.id || `prod-${crypto.randomUUID()}`,
-            name,
-            category,
-            price: Math.round(price),
-            image: String(payload.image || existingProduct?.image || '/assets/decorative-luxury-cluster.jpg').trim(),
-            description: String(payload.description || existingProduct?.description || '').trim(),
-            featured: Boolean(payload.featured),
-            publicVisible:
-                typeof payload.publicVisible === 'undefined'
-                    ? existingProduct?.publicVisible ?? true
-                    : Boolean(payload.publicVisible),
-            stock: Number.isFinite(stock) ? Math.max(0, Math.trunc(stock)) : existingProduct?.stock || 0,
-        },
-    };
 };
 
 const buildOrderFromCallback = (callbackBody) => {
@@ -257,35 +194,6 @@ const getAccessToken = async () => {
     return cachedToken;
 };
 
-const requireAdmin = async (req, res, next) => {
-    // Check session first (for local development)
-    if (req.session?.isAdmin) {
-        return next();
-    }
-
-    // Check for token in Authorization header
-    const authHeader = req.headers.authorization || '';
-    const token = authHeader.replace('Bearer ', '').trim();
-    
-    if (token) {
-        try {
-            const adminToken = await AdminToken.findOne({ token });
-            if (adminToken) {
-                req.adminUser = adminToken.adminUser;
-                return next();
-            }
-        } catch (error) {
-            console.error('Token verification error:', error);
-        }
-    }
-
-    if (req.accepts('html') && !req.path.startsWith('/api/')) {
-        return res.redirect('/login.html');
-    }
-
-    return res.status(401).json({ error: 'Unauthorized' });
-};
-
 // Middleware
 app.use(cors({
     origin: true,
@@ -328,128 +236,9 @@ app.get('/', async (req, res, next) => {
     }
 });
 
-app.get('/api/session', (req, res) => {
-    res.json({ loggedIn: Boolean(req.session?.isAdmin), user: req.session?.adminUser || null });
-});
 
-app.get('/api/admin/settings', requireAdmin, async (req, res, next) => {
-    try {
-        const settings = await AdminSettings.findOne({});
-        return res.json({ username: settings?.username || ADMIN_USER });
-    } catch (error) {
-        return next(error);
-    }
-});
 
-app.post('/api/admin/login', async (req, res) => {
-    const username = String(req.body?.username || '').trim();
-    const password = String(req.body?.password || '').trim();
 
-    try {
-        let settings = await AdminSettings.findOne({});
-
-        if (!settings) {
-            // Initialize with defaults if not exists
-            const { passwordSalt, passwordHash } = hashPassword(ADMIN_PASS);
-            settings = await AdminSettings.create({
-                username: ADMIN_USER,
-                passwordSalt,
-                passwordHash,
-            });
-        }
-
-        if (username !== settings.username || !verifyPassword(password, settings)) {
-            return res.status(401).json({ error: 'Invalid credentials' });
-        }
-
-        // Generate token for cross-domain authentication
-        const token = crypto.randomBytes(32).toString('hex');
-        
-        try {
-            await AdminToken.create({
-                token,
-                adminUser: username,
-            });
-            
-            console.log(`✅ Admin login successful for user: ${username}`);
-            return res.json({ 
-                ok: true, 
-                token: token,
-                user: username 
-            });
-        } catch (tokenError) {
-            console.error('Error creating token:', tokenError);
-            return res.status(500).json({ error: 'Unable to create session token' });
-        }
-    } catch (error) {
-        return res.status(500).json({ error: 'Unable to read admin settings', detail: error.message });
-    }
-});
-
-app.put('/api/admin/settings', requireAdmin, async (req, res, next) => {
-    try {
-        const currentPassword = String(req.body?.currentPassword || '');
-        const nextUsername = String(req.body?.username || '').trim();
-        const nextPassword = String(req.body?.newPassword || '').trim();
-        const confirmPassword = String(req.body?.confirmPassword || '').trim();
-
-        let settings = await AdminSettings.findOne({});
-
-        if (!settings) {
-            return res.status(500).json({ error: 'Admin settings not found' });
-        }
-
-        if (!verifyPassword(currentPassword, settings)) {
-            return res.status(401).json({ error: 'Current password is incorrect' });
-        }
-
-        if (!nextUsername) {
-            return res.status(400).json({ error: 'Username is required' });
-        }
-
-        if (nextPassword && nextPassword.length < 6) {
-            return res.status(400).json({ error: 'New password must be at least 6 characters long' });
-        }
-
-        if (nextPassword && nextPassword !== confirmPassword) {
-            return res.status(400).json({ error: 'Passwords do not match' });
-        }
-
-        const passwordUpdate = nextPassword
-            ? hashPassword(nextPassword)
-            : {
-                passwordSalt: settings.passwordSalt,
-                passwordHash: settings.passwordHash,
-            };
-
-        settings.username = nextUsername;
-        settings.passwordSalt = passwordUpdate.passwordSalt;
-        settings.passwordHash = passwordUpdate.passwordHash;
-        settings.updatedAt = new Date();
-        await settings.save();
-
-        req.session.adminUser = nextUsername;
-
-        return res.json({ ok: true, username: nextUsername, passwordChanged: Boolean(nextPassword) });
-    } catch (error) {
-        return next(error);
-    }
-});
-
-app.post('/api/admin/logout', (req, res) => {
-    return req.session.destroy((error) => {
-        if (error) {
-            return res.status(500).json({ error: 'Unable to end session' });
-        }
-
-        res.clearCookie('connect.sid');
-        return res.json({ ok: true });
-    });
-});
-
-app.get(['/admin', '/admin/'], requireAdmin, (req, res) => {
-    return res.sendFile(privateAdminFile);
-});
 
 app.get('/api/products', async (req, res, next) => {
     try {
@@ -457,76 +246,6 @@ app.get('/api/products', async (req, res, next) => {
             .sort({ featured: -1, name: 1 })
             .lean();
         return res.json(products);
-    } catch (error) {
-        return next(error);
-    }
-});
-
-app.get('/api/admin/products', requireAdmin, async (req, res, next) => {
-    try {
-        const products = await Product.find().sort({ createdAt: -1 }).lean();
-        return res.json(products);
-    } catch (error) {
-        return next(error);
-    }
-});
-
-app.post('/api/admin/products', requireAdmin, async (req, res, next) => {
-    try {
-        const normalized = normalizeProductPayload(req.body);
-
-        if (normalized.error) {
-            return res.status(400).json({ error: normalized.error });
-        }
-
-        const product = await Product.create(normalized.product);
-        return res.status(201).json(product);
-    } catch (error) {
-        return next(error);
-    }
-});
-
-app.put('/api/admin/products/:id', requireAdmin, async (req, res, next) => {
-    try {
-        const product = await Product.findOne({ id: req.params.id });
-
-        if (!product) {
-            return res.status(404).json({ error: 'Product not found' });
-        }
-
-        const normalized = normalizeProductPayload(req.body, product);
-        if (normalized.error) {
-            return res.status(400).json({ error: normalized.error });
-        }
-
-        Object.assign(product, normalized.product);
-        product.updatedAt = new Date();
-        await product.save();
-
-        return res.json(product);
-    } catch (error) {
-        return next(error);
-    }
-});
-
-app.delete('/api/admin/products/:id', requireAdmin, async (req, res, next) => {
-    try {
-        const result = await Product.deleteOne({ id: req.params.id });
-
-        if (result.deletedCount === 0) {
-            return res.status(404).json({ error: 'Product not found' });
-        }
-
-        return res.json({ ok: true });
-    } catch (error) {
-        return next(error);
-    }
-});
-
-app.get('/api/admin/orders', requireAdmin, async (req, res, next) => {
-    try {
-        const orders = await Order.find().sort({ receivedAt: -1 }).lean();
-        return res.json(orders);
     } catch (error) {
         return next(error);
     }
