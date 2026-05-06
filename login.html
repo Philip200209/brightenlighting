@@ -162,9 +162,28 @@
                     console.log('Login response data:', data);
 
                     if (response.ok) {
-                        setMessage('Login successful!', false);
-                        setTimeout(() => {
-                            window.location.href = `${API_BASE}/admin`;
+                        setMessage('Login successful! Redirecting...', false);
+                        
+                        // Verify session was created before redirecting
+                        setTimeout(async () => {
+                            try {
+                                const sessionCheck = await fetch(`${API_BASE}/api/session`, {
+                                    credentials: 'include',
+                                });
+                                const sessionData = await sessionCheck.json();
+                                console.log('Session check:', sessionData);
+                                
+                                if (sessionData.loggedIn) {
+                                    console.log('Session confirmed, redirecting to admin...');
+                                    window.location.href = `${API_BASE}/admin`;
+                                } else {
+                                    setMessage('Session not established. Try again.', true);
+                                }
+                            } catch (err) {
+                                console.error('Session check error:', err);
+                                // Still try to redirect in case of network issues
+                                window.location.href = `${API_BASE}/admin`;
+                            }
                         }, 500);
                         return;
                     }
