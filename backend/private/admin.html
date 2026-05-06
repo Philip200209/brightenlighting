@@ -639,18 +639,30 @@
           .replaceAll('"', '&quot;')
           .replaceAll("'", '&#39;');
 
+      const TOKEN_KEY = 'adminToken';
+      const getToken = () => localStorage.getItem(TOKEN_KEY);
+      const clearToken = () => localStorage.removeItem(TOKEN_KEY);
+
+      // Redirect to login if no token
+      if (!getToken()) {
+        window.location.href = 'https://brighten-lighting-api.onrender.com/login.html';
+      }
+
       const apiFetch = async (url, options = {}) => {
+        const token = getToken();
         const response = await fetch(url, {
-          credentials: 'same-origin',
+          credentials: 'include',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
             ...(options.headers || {}),
           },
           ...options,
         });
 
         if (response.status === 401) {
-          window.location.href = '/login.html';
+          clearToken();
+          window.location.href = 'https://brighten-lighting-api.onrender.com/login.html';
           throw new Error('Unauthorized');
         }
 

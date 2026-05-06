@@ -58,9 +58,16 @@ const orderSchema = new mongoose.Schema({
     raw: mongoose.Schema.Types.Mixed,
 });
 
+const adminTokenSchema = new mongoose.Schema({
+    token: { type: String, required: true, unique: true },
+    adminUser: { type: String, required: true },
+    createdAt: { type: Date, default: Date.now, expires: 86400 }, // 24 hour TTL
+});
+
 const AdminSettings = mongoose.model('AdminSettings', adminSettingsSchema);
 const Product = mongoose.model('Product', productSchema);
 const Order = mongoose.model('Order', orderSchema);
+const AdminToken = mongoose.model('AdminToken', adminTokenSchema);
 
 const endpoints = {
     sandbox: {
@@ -250,9 +257,26 @@ const getAccessToken = async () => {
     return cachedToken;
 };
 
-const requireAdmin = (req, res, next) => {
+const requireAdmin = async (req, res, next) => {
+    // Check session first (for local development)
     if (req.session?.isAdmin) {
         return next();
+    }
+
+    // Check for token in Authorization header
+    const authHeader = req.headers.authorization || '';
+    const token = authHeader.replace('Bearer ', '').trim();
+    
+    if (token) {
+        try {
+            const adminToken = await AdminToken.findOne({ token });
+            if (adminToken) {
+                req.adminUser = adminToken.adminUser;
+                return next();
+            }
+        } catch (error) {
+            console.error('Token verification error:', error);
+        }
     }
 
     if (req.accepts('html') && !req.path.startsWith('/api/')) {
@@ -338,22 +362,25 @@ app.post('/api/admin/login', async (req, res) => {
             return res.status(401).json({ error: 'Invalid credentials' });
         }
 
-        return req.session.regenerate((error) => {
-            if (error) {
-                return res.status(500).json({ error: 'Unable to create admin session' });
-            }
-
-            req.session.isAdmin = true;
-            req.session.adminUser = username;
-            
-            // Explicitly save session to ensure cookie is sent
-            req.session.save((saveError) => {
-                if (saveError) {
-                    return res.status(500).json({ error: 'Unable to save session' });
-                }
-                return res.json({ ok: true });
+        // Generate token for cross-domain authentication
+        const token = crypto.randomBytes(32).toString('hex');
+        
+        try {
+            await AdminToken.create({
+                token,
+                adminUser: username,
             });
-        });
+            
+            console.log(`✅ Admin login successful for user: ${username}`);
+            return res.json({ 
+                ok: true, 
+                token: token,
+                user: username 
+            });
+        } catch (tokenError) {
+            console.error('Error creating token:', tokenError);
+            return res.status(500).json({ error: 'Unable to create session token' });
+        }
     } catch (error) {
         return res.status(500).json({ error: 'Unable to read admin settings', detail: error.message });
     }
