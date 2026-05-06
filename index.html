@@ -230,6 +230,39 @@
             .hero-section {
                 min-height: 400px;
             }
+
+            .product-card {
+                margin: 0 auto;
+            }
+
+            .category-card {
+                padding: 20px;
+            }
+
+            .category-card h3 {
+                font-size: 1rem;
+            }
+
+            .benefit-card {
+                padding: 20px;
+            }
+
+            .nav-link {
+                font-size: 0.85rem;
+            }
+
+            .btn-gold {
+                padding: 10px 20px;
+                font-size: 0.9rem;
+            }
+
+            .modal-content {
+                padding: 20px;
+            }
+
+            .input-field {
+                font-size: 16px;
+            }
         }
     </style>
 </head>
@@ -399,34 +432,14 @@
     <!-- SERVICE AREAS -->
     <section class="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         <div class="text-center mb-16">
-            <h2 class="section-title">Our Service Areas</h2>
-            <p class="text-gray-400 text-lg max-w-2xl mx-auto">We deliver across Kenya with reliable service</p>
+            <h2 class="section-title">Our Service Area</h2>
+            <p class="text-gray-400 text-lg max-w-2xl mx-auto">Proudly serving Eldoret City with premium lighting solutions</p>
         </div>
 
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-            <div class="bg-card rounded-lg p-6 text-center border border-gold-text/10 hover:border-gold-text/30 transition">
-                <p class="font-semibold">Nairobi</p>
-            </div>
-            <div class="bg-card rounded-lg p-6 text-center border border-gold-text/10 hover:border-gold-text/30 transition">
-                <p class="font-semibold">Mombasa</p>
-            </div>
-            <div class="bg-card rounded-lg p-6 text-center border border-gold-text/10 hover:border-gold-text/30 transition">
-                <p class="font-semibold">Kisumu</p>
-            </div>
-            <div class="bg-card rounded-lg p-6 text-center border border-gold-text/10 hover:border-gold-text/30 transition">
-                <p class="font-semibold">Kigali</p>
-            </div>
-            <div class="bg-card rounded-lg p-6 text-center border border-gold-text/10 hover:border-gold-text/30 transition">
-                <p class="font-semibold">Kampala</p>
-            </div>
-            <div class="bg-card rounded-lg p-6 text-center border border-gold-text/10 hover:border-gold-text/30 transition">
-                <p class="font-semibold">Dar es Salaam</p>
-            </div>
-            <div class="bg-card rounded-lg p-6 text-center border border-gold-text/10 hover:border-gold-text/30 transition">
-                <p class="font-semibold">Nakuru</p>
-            </div>
-            <div class="bg-card rounded-lg p-6 text-center border border-gold-text/10 hover:border-gold-text/30 transition">
-                <p class="font-semibold">+ More Cities</p>
+        <div class="flex justify-center">
+            <div class="bg-card rounded-lg p-8 text-center border border-gold-text/10 hover:border-gold-text/30 transition max-w-md w-full">
+                <p class="font-semibold text-xl gold-text">ELDORET CITY</p>
+                <p class="text-gray-400 mt-3 text-sm">Fast & Reliable Delivery | Expert Support</p>
             </div>
         </div>
     </section>
@@ -438,41 +451,41 @@
             <p class="text-gray-400 text-lg max-w-2xl mx-auto font-semibold">CALL US TODAY!</p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
             <div class="text-center">
-                <p class="text-gray-400">Phone</p>
-                <p class="font-semibold gold-text text-2xl">0722339377</p>
+                <p class="text-gray-400 text-sm">Phone</p>
+                <p class="font-semibold gold-text text-xl md:text-2xl">0722339377</p>
             </div>
             <div class="text-center">
-                <p class="text-gray-400">Website</p>
-                <p class="font-semibold gold-text">www.brightenlighting.com</p>
+                <p class="text-gray-400 text-sm">Website</p>
+                <p class="font-semibold gold-text text-sm md:text-base">www.brightenlighting.com</p>
             </div>
             <div class="text-center">
-                <p class="text-gray-400">Location</p>
-                <p class="font-semibold gold-text">Eldoret City</p>
+                <p class="text-gray-400 text-sm">Location</p>
+                <p class="font-semibold gold-text text-sm md:text-base">Eldoret City</p>
             </div>
         </div>
 
-        <form class="bg-card p-8 rounded-lg border border-gold-text/10">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <form class="bg-card p-6 md:p-8 rounded-lg border border-gold-text/10">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-4 md:mb-6">
                 <div>
-                    <label class="block text-sm font-medium mb-2">Your Name</label>
-                    <input type="text" class="input-field w-full" placeholder="John Doe">
+                    <label class="block text-xs md:text-sm font-medium mb-2">Your Name</label>
+                    <input type="text" class="input-field w-full text-sm" placeholder="John Doe">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium mb-2">Email Address</label>
-                    <input type="email" class="input-field w-full" placeholder="you@example.com">
+                    <label class="block text-xs md:text-sm font-medium mb-2">Email Address</label>
+                    <input type="email" class="input-field w-full text-sm" placeholder="you@example.com">
                 </div>
             </div>
-            <div class="mb-6">
-                <label class="block text-sm font-medium mb-2">Phone Number</label>
-                <input type="tel" class="input-field w-full" placeholder="+254 (0) XXX XXX XXX">
+            <div class="mb-4 md:mb-6">
+                <label class="block text-xs md:text-sm font-medium mb-2">Phone Number</label>
+                <input type="tel" class="input-field w-full text-sm" placeholder="0722 XXX XXX">
             </div>
             <div class="mb-6">
-                <label class="block text-sm font-medium mb-2">Message</label>
-                <textarea class="input-field w-full h-32 resize-none" placeholder="Tell us about your lighting needs..."></textarea>
+                <label class="block text-xs md:text-sm font-medium mb-2">Message</label>
+                <textarea class="input-field w-full h-24 md:h-32 resize-none text-sm" placeholder="Tell us about your lighting needs..."></textarea>
             </div>
-            <button type="submit" class="btn-gold w-full md:w-auto">Send Inquiry</button>
+            <button type="submit" class="btn-gold w-full">Send Inquiry</button>
         </form>
     </section>
 
