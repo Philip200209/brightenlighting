@@ -259,6 +259,96 @@ app.get('/api/products', async (req, res, next) => {
     }
 });
 
+// ===== ADMIN PRODUCT CRUD ENDPOINTS =====
+// Get all products (admin - no filters)
+app.get('/api/products/admin/all', async (req, res, next) => {
+    try {
+        const products = await Product.find().sort({ createdAt: -1 }).lean();
+        return res.json(products);
+    } catch (error) {
+        return next(error);
+    }
+});
+
+// Get single product by ID
+app.get('/api/products/:id', async (req, res, next) => {
+    try {
+        const product = await Product.findById(req.params.id).lean();
+        if (!product) return res.status(404).json({ error: 'Product not found' });
+        return res.json(product);
+    } catch (error) {
+        return next(error);
+    }
+});
+
+// Create new product (admin)
+app.post('/api/products', async (req, res, next) => {
+    try {
+        const { name, category, price, stock, description } = req.body;
+        
+        if (!name || !category || price === undefined || stock === undefined) {
+            return res.status(400).json({ error: 'Missing required fields' });
+        }
+
+        let imageData = '';
+        if (req.body.image && req.body.image.startsWith('data:image')) {
+            imageData = req.body.image;
+        }
+
+        const product = new Product({
+            id: `prod-${Date.now()}`,
+            name,
+            category,
+            price: Number(price),
+            stock: Number(stock),
+            description: description || '',
+            image: imageData || '/assets/decorative-luxury-cluster.jpg',
+            featured: false,
+            publicVisible: true
+        });
+
+        await product.save();
+        return res.status(201).json(product);
+    } catch (error) {
+        return next(error);
+    }
+});
+
+// Update product
+app.put('/api/products/:id', async (req, res, next) => {
+    try {
+        const { name, category, price, stock, description, image } = req.body;
+        const product = await Product.findById(req.params.id);
+
+        if (!product) return res.status(404).json({ error: 'Product not found' });
+
+        if (name) product.name = name;
+        if (category) product.category = category;
+        if (price !== undefined) product.price = Number(price);
+        if (stock !== undefined) product.stock = Number(stock);
+        if (description !== undefined) product.description = description;
+        if (image && image.startsWith('data:image')) product.image = image;
+
+        product.updatedAt = new Date();
+        await product.save();
+
+        return res.json(product);
+    } catch (error) {
+        return next(error);
+    }
+});
+
+// Delete product
+app.delete('/api/products/:id', async (req, res, next) => {
+    try {
+        const result = await Product.findByIdAndDelete(req.params.id);
+        if (!result) return res.status(404).json({ error: 'Product not found' });
+        return res.json({ deleted: true });
+    } catch (error) {
+        return next(error);
+    }
+});
+
 // ===== MPESA PAYMENT =====
 app.post('/stkpush', async (req, res) => {
     try {
