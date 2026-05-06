@@ -283,9 +283,20 @@
                 
                 <div class="flex items-center gap-6">
                     <button class="text-gray-400 hover:text-gold-accent transition">🔔</button>
-                    <div class="flex items-center gap-2">
-                        <div class="w-10 h-10 rounded-full bg-gradient-to-r from-yellow-500 to-yellow-600 flex items-center justify-center font-bold">P</div>
-                        <span class="text-sm hidden sm:inline">Philip N.</span>
+                    <div class="relative group">
+                        <button class="flex items-center gap-2 hover:bg-gray-800 px-3 py-2 rounded-lg transition">
+                            <div class="w-10 h-10 rounded-full bg-gradient-to-r from-yellow-500 to-yellow-600 flex items-center justify-center font-bold">L</div>
+                            <span class="text-sm hidden sm:inline">Lime</span>
+                            <span class="text-xs">▼</span>
+                        </button>
+                        <div class="absolute right-0 mt-2 w-48 bg-gray-800 rounded-lg shadow-lg border border-gray-700 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
+                            <div class="p-4 border-b border-gray-700">
+                                <div class="font-semibold text-gold-accent">Lime</div>
+                                <div class="text-xs text-gray-400">Admin Account</div>
+                            </div>
+                            <button onclick="switchPage('settings')" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-700">⚙️ Settings</button>
+                            <button onclick="logout()" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-700 text-red-400">🚪 Logout</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -296,7 +307,7 @@
                 <!-- DASHBOARD PAGE -->
                 <div id="page-dashboard" class="page-content active">
                     <div class="mb-8">
-                        <h1 class="text-3xl font-bold mb-2">Welcome back, Philip!</h1>
+                        <h1 class="text-3xl font-bold mb-2">Welcome back, Lime! 👋</h1>
                         <p class="text-gray-400">Here's your business snapshot for today</p>
                     </div>
                     
@@ -541,44 +552,58 @@
 
     <!-- PRODUCT MODAL -->
     <div id="productModal" class="modal" onclick="if(event.target.id === 'productModal') closeModal('productModal')">
-        <div class="bg-gray-800 rounded-lg p-8 w-full max-w-2xl max-h-96 overflow-y-auto">
+        <div class="bg-gray-800 rounded-lg p-8 w-full max-w-3xl max-h-96 overflow-y-auto">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-2xl font-bold gold-accent" id="productModalTitle">Add Product</h2>
                 <button onclick="closeModal('productModal')" class="text-gray-400 text-2xl">&times;</button>
             </div>
             
             <div class="space-y-4">
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium mb-2">Product Name</label>
-                        <input type="text" id="productName" class="input-field rounded-lg w-full">
+                <div class="grid grid-cols-3 gap-4">
+                    <div class="col-span-2">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Product Name</label>
+                                <input type="text" id="productName" class="input-field rounded-lg w-full">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Category</label>
+                                <select id="productCategory" class="input-field rounded-lg w-full">
+                                    <option>Ceiling</option>
+                                    <option>Decorative</option>
+                                    <option>Pendant</option>
+                                    <option>Outdoor</option>
+                                    <option>Wall</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4 mt-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Price (KSh)</label>
+                                <input type="number" id="productPrice" class="input-field rounded-lg w-full">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Stock</label>
+                                <input type="number" id="productStock" class="input-field rounded-lg w-full">
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <label class="block text-sm font-medium mb-2">Description</label>
+                            <textarea id="productDescription" class="input-field rounded-lg w-full h-16 resize-none"></textarea>
+                        </div>
                     </div>
+                    
                     <div>
-                        <label class="block text-sm font-medium mb-2">Category</label>
-                        <select id="productCategory" class="input-field rounded-lg w-full">
-                            <option>Ceiling</option>
-                            <option>Decorative</option>
-                            <option>Pendant</option>
-                            <option>Outdoor</option>
-                            <option>Wall</option>
-                        </select>
+                        <label class="block text-sm font-medium mb-2">Product Image</label>
+                        <div class="border-2 border-dashed border-gold-accent rounded-lg p-4 text-center cursor-pointer hover:bg-gray-700 transition" onclick="document.getElementById('productImage').click()">
+                            <div id="imagePreview" class="w-full h-32 flex items-center justify-center">
+                                <span class="text-gray-400 text-sm">📷 Click to upload</span>
+                            </div>
+                            <input type="file" id="productImage" accept="image/*" class="hidden" onchange="previewProductImage(event)">
+                        </div>
                     </div>
-                </div>
-                
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium mb-2">Price (KSh)</label>
-                        <input type="number" id="productPrice" class="input-field rounded-lg w-full">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-2">Stock</label>
-                        <input type="number" id="productStock" class="input-field rounded-lg w-full">
-                    </div>
-                </div>
-                
-                <div>
-                    <label class="block text-sm font-medium mb-2">Description</label>
-                    <textarea id="productDescription" class="input-field rounded-lg w-full h-24 resize-none"></textarea>
                 </div>
                 
                 <div class="flex gap-4">
@@ -672,11 +697,11 @@
     <script>
         // ===== DATA STORAGE =====
         let products = [
-            { id: 1, name: 'Ceiling Panel Light', category: 'ceiling', price: 6800, stock: 12, status: 'active', description: 'Slim overhead lighting' },
-            { id: 2, name: 'Decorative Cluster Pendant', category: 'decorative', price: 5500, stock: 8, status: 'active', description: 'Modern statement pendant' },
-            { id: 3, name: 'Pendant Light Trio', category: 'pendant', price: 12500, stock: 4, status: 'active', description: 'Warm interior pendant set' },
-            { id: 4, name: 'Outdoor Path Light', category: 'outdoor', price: 7900, stock: 2, status: 'active', description: 'Weather-ready exterior lighting' },
-            { id: 5, name: 'Wall Sconce Pair', category: 'wall', price: 4200, stock: 10, status: 'active', description: 'Ambient wall lighting' },
+            { id: 1, name: 'Ceiling Panel Light', category: 'ceiling', price: 6800, stock: 12, status: 'active', description: 'Slim overhead lighting', image: '' },
+            { id: 2, name: 'Decorative Cluster Pendant', category: 'decorative', price: 5500, stock: 8, status: 'active', description: 'Modern statement pendant', image: '' },
+            { id: 3, name: 'Pendant Light Trio', category: 'pendant', price: 12500, stock: 4, status: 'active', description: 'Warm interior pendant set', image: '' },
+            { id: 4, name: 'Outdoor Path Light', category: 'outdoor', price: 7900, stock: 2, status: 'active', description: 'Weather-ready exterior lighting', image: '' },
+            { id: 5, name: 'Wall Sconce Pair', category: 'wall', price: 4200, stock: 10, status: 'active', description: 'Ambient wall lighting', image: '' },
         ];
 
         let events = [
@@ -733,7 +758,7 @@
             const tbody = document.getElementById('productsTableBody');
             tbody.innerHTML = products.map(p => `
                 <tr>
-                    <td><div class="w-10 h-10 bg-gradient-to-r from-yellow-500 to-yellow-600 rounded"></div></td>
+                    <td><img src="${p.image || 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2240%22 height=%2240%22%3E%3Crect fill=%22%23FFD700%22 width=%2240%22 height=%2240%22 rx=%228%22/%3E%3C/svg%3E'}" alt="${p.name}" class="w-10 h-10 rounded object-cover"></td>
                     <td>${p.name}</td>
                     <td><span class="capitalize">${p.category}</span></td>
                     <td>KSh ${p.price.toLocaleString()}</td>
@@ -754,6 +779,8 @@
             document.getElementById('productPrice').value = '';
             document.getElementById('productStock').value = '';
             document.getElementById('productDescription').value = '';
+            document.getElementById('productImage').value = '';
+            document.getElementById('imagePreview').innerHTML = '<span class="text-gray-400 text-sm">📷 Click to upload</span>';
             openModal('productModal');
         }
 
@@ -768,7 +795,26 @@
             document.getElementById('productPrice').value = product.price;
             document.getElementById('productStock').value = product.stock;
             document.getElementById('productDescription').value = product.description;
+            document.getElementById('productImage').value = '';
+            if (product.image) {
+                document.getElementById('imagePreview').innerHTML = `<img src="${product.image}" alt="${product.name}" class="w-full h-32 object-cover rounded">`;
+            } else {
+                document.getElementById('imagePreview').innerHTML = '<span class="text-gray-400 text-sm">📷 Click to upload</span>';
+            }
             openModal('productModal');
+        }
+
+        function previewProductImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('imagePreview');
+                    preview.innerHTML = `<img src="${e.target.result}" alt="preview" class="w-full h-32 object-cover rounded">`;
+                    preview.dataset.imageData = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
         }
 
         function saveProduct() {
@@ -777,6 +823,8 @@
             const price = parseFloat(document.getElementById('productPrice').value);
             const stock = parseInt(document.getElementById('productStock').value);
             const description = document.getElementById('productDescription').value.trim();
+            const preview = document.getElementById('imagePreview');
+            const imageData = preview.dataset.imageData || '';
             
             if (!name || !price || !stock) {
                 alert('Please fill all fields');
@@ -792,6 +840,7 @@
                     product.price = price;
                     product.stock = stock;
                     product.description = description;
+                    if (imageData) product.image = imageData;
                 }
                 alert('Product updated successfully!');
             } else {
@@ -799,7 +848,8 @@
                 products.push({
                     id: Math.max(...products.map(p => p.id)) + 1,
                     name, category, price, stock, description,
-                    status: 'active'
+                    status: 'active',
+                    image: imageData
                 });
                 alert('Product added successfully!');
             }
