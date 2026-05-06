@@ -94,7 +94,7 @@
     </div>
 
     <script>
-        const API_BASE = 'https://brighten-lighting-api.onrender.com';
+        const API_BASE = window.location.origin;
 
         async function handleLogin(event) {
             event.preventDefault();
@@ -114,7 +114,7 @@
 
                 if (response.ok && data.token) {
                     // Redirect with token in URL hash
-                    window.location.href = `${API_BASE}/admin-dashboard.html#token=${encodeURIComponent(data.token)}`;
+                    window.location.href = `${API_BASE}/admin-dashboard#token=${encodeURIComponent(data.token)}`;
                 } else {
                     errorMessage.classList.remove('hidden');
                     console.error('Login failed:', data.error);

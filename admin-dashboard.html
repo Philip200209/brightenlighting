@@ -229,7 +229,7 @@
         }
         
         if (!token) {
-            window.location.href = 'https://philip200209.github.io/brightenlighting/login.html';
+            window.location.href = window.location.origin + '/admin-login';
         }
     </script>
 
@@ -961,7 +961,7 @@
         function logout() {
             localStorage.removeItem('token');
             token = null;
-            window.location.href = 'https://philip200209.github.io/brightenlighting/login.html';
+            window.location.href = window.location.origin + '/admin-login';
         }
 
         // ===== UTILITY FUNCTIONS =====
