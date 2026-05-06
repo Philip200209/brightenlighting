@@ -264,8 +264,17 @@ const requireAdmin = (req, res, next) => {
 
 // Middleware
 app.use(cors({
-    origin: [FRONTEND_URL, 'http://localhost:3000', 'http://localhost:5500'],
-    credentials: true
+    origin: function(origin, callback) {
+        const allowedOrigins = [FRONTEND_URL, 'http://localhost:3000', 'http://localhost:5500'];
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true }));
