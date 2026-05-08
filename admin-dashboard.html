@@ -232,9 +232,9 @@
                         <div class="text-xs text-gray-500 mt-2">↑ 3 new this month</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-value">12</div>
+                        <div class="stat-value" id="stat-inquiries">-</div>
                         <div class="stat-label">New Inquiries</div>
-                        <div class="text-xs text-gray-500 mt-2">⚠️ 5 pending reply</div>
+                        <div class="text-xs text-gray-500 mt-2" id="stat-inquiry-note">⚠️ Loading inquiries...</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-value">3</div>
@@ -988,15 +988,19 @@
                     <td>${i.email}</td>
                     <td>${String(i.message || '').substring(0, 30)}...</td>
                     <td><span class="badge badge-${i.status === 'new' ? 'warning' : 'success'}">${i.status === 'new' ? 'New' : 'Replied'}</span></td>
-                    <td><button onclick="openInquiryModal(${JSON.stringify(i.id)})" style="color: #60a5fa; cursor: pointer;">View</button></td>
+                    <td>
+                        <button type="button" onclick="openInquiryModal(${JSON.stringify(i.id)})" style="color: #60a5fa; cursor: pointer; text-decoration: underline;">
+                            View
+                        </button>
+                    </td>
                 </tr>
             `).join('');
         }
 
         function openInquiryModal(id) {
-            const inquiry = inquiries.find(i => i.id === id);
+            const inquiry = inquiries.find(i => String(i.id) === String(id) || String(i._id) === String(id));
             if (!inquiry) return;
-            currentInquiryId = id;
+            currentInquiryId = inquiry.id || inquiry._id || id;
             document.getElementById('inquiryDetails').innerHTML = `
                 <div class="form-group">
                     <label class="form-label">Name</label>
@@ -1033,11 +1037,25 @@
             try {
                 inquiries = await apiCall('GET', '/api/inquiries');
                 renderInquiries();
+                updateInquiryStats();
             } catch (error) {
                 inquiries = [];
                 renderInquiries();
+                updateInquiryStats();
                 console.error('Failed to load inquiries', error);
             }
+        }
+
+        function updateInquiryStats() {
+            const totalEl = document.getElementById('stat-inquiries');
+            const noteEl = document.getElementById('stat-inquiry-note');
+            const total = inquiries.length;
+            const pending = inquiries.filter((inquiry) => String(inquiry.status || 'new').toLowerCase() === 'new').length;
+
+            if (totalEl) totalEl.textContent = String(total);
+            if (noteEl) noteEl.textContent = pending > 0
+                ? `⚠️ ${pending} pending reply`
+                : '✅ No pending replies';
         }
 
         // ===== MODAL MANAGEMENT =====
