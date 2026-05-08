@@ -530,9 +530,11 @@
 
     <script>
         // ===== CONFIGURATION =====
-        const API_BASE = (location.protocol === 'file:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')
-            ? 'http://localhost:3000'
-            : 'https://brighten-lighting-api.onrender.com';
+        // Use production API when served from the production host, otherwise point to the local backend on the same host (port 3000).
+        const PROD_HOSTS = ['philip200209.github.io', 'brighten-lighting-api.onrender.com'];
+        const API_BASE = PROD_HOSTS.includes(location.hostname)
+            ? 'https://brighten-lighting-api.onrender.com'
+            : `http://${location.hostname}:3000`;
         let token = null;
         let currentEditingProductId = null;
         let selectedProductImage = null;
