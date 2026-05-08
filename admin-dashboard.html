@@ -476,7 +476,7 @@
     <div id="eventModal" class="modal" onclick="if(event.target.id === 'eventModal') closeModal('eventModal')">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 class="modal-title">New Event</h2>
+                <h2 class="modal-title" id="eventModalTitle">New Event</h2>
                 <button class="modal-close" onclick="closeModal('eventModal')">&times;</button>
             </div>
             <div class="form-group">
@@ -537,6 +537,7 @@
         let token = null;
         let currentEditingProductId = null;
         let selectedProductImage = null;
+        let currentEditingEventId = null;
 
         // ===== AUTHENTICATION =====
         function checkAuth() {
@@ -874,6 +875,10 @@
             const container = document.getElementById('eventsContainer');
             container.innerHTML = events.map(e => `
                 <div class="card p-6 rounded-lg">
+                    <div style="display:flex; justify-content:flex-end; gap:10px; margin-bottom: 12px;">
+                        <button type="button" onclick="editEvent(${e.id})" title="Edit event" style="color:#F59E0B; font-size:18px; line-height:1; cursor:pointer;">✎</button>
+                        <button type="button" onclick="deleteEvent(${e.id})" title="Delete event" style="color:#ef4444; font-size:18px; line-height:1; cursor:pointer;">✕</button>
+                    </div>
                     <h3 class="text-lg font-bold gold-accent mb-2">${e.title}</h3>
                     <div class="text-sm text-gray-400 mb-4">
                         <div>📅 ${e.date} at ${e.time}</div>
@@ -885,6 +890,8 @@
         }
 
         function openEventModal() {
+            currentEditingEventId = null;
+            document.getElementById('eventModalTitle').textContent = 'New Event';
             document.getElementById('eventTitle').value = '';
             document.getElementById('eventDate').value = '';
             document.getElementById('eventTime').value = '';
@@ -893,7 +900,33 @@
             openModal('eventModal');
         }
 
+        function editEvent(id) {
+            const event = events.find(item => item.id === id);
+            if (!event) return;
+
+            currentEditingEventId = id;
+            document.getElementById('eventModalTitle').textContent = 'Edit Event';
+            document.getElementById('eventTitle').value = event.title;
+            document.getElementById('eventDate').value = event.date;
+            document.getElementById('eventTime').value = event.time;
+            document.getElementById('eventLocation').value = event.location;
+            document.getElementById('eventDescription').value = event.description || '';
+            openModal('eventModal');
+        }
+
+        function deleteEvent(id) {
+            const event = events.find(item => item.id === id);
+            if (!event) return;
+
+            if (!confirm(`Delete event "${event.title}"?`)) return;
+
+            events = events.filter(item => item.id !== id);
+            renderEvents();
+            alert('Event deleted successfully!');
+        }
+
         function saveEvent() {
+            const isEditing = Boolean(currentEditingEventId);
             const title = document.getElementById('eventTitle').value.trim();
             const date = document.getElementById('eventDate').value;
             const time = document.getElementById('eventTime').value;
@@ -905,14 +938,22 @@
                 return;
             }
 
-            events.push({
-                id: Math.max(...events.map(e => e.id)) + 1,
-                title, date, time, location, description
-            });
+            if (currentEditingEventId) {
+                events = events.map(event => event.id === currentEditingEventId
+                    ? { ...event, title, date, time, location, description }
+                    : event
+                );
+            } else {
+                events.push({
+                    id: events.length ? Math.max(...events.map(e => e.id)) + 1 : 1,
+                    title, date, time, location, description
+                });
+            }
 
             renderEvents();
+            currentEditingEventId = null;
             closeModal('eventModal');
-            alert('Event created successfully!');
+            alert(isEditing ? 'Event updated successfully!' : 'Event created successfully!');
         }
 
         // ===== INQUIRIES =====
