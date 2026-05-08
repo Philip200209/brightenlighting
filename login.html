@@ -238,7 +238,7 @@
                 if (response.ok && data.token) {
                     // Store token and redirect
                     localStorage.setItem('adminToken', data.token);
-                    window.location.href = `/brightenlighting/admin-dashboard.html#token=${data.token}`;
+                    window.location.href = `admin-dashboard.html#token=${data.token}`;
                 } else {
                     errorMessage.textContent = 'Invalid credentials. Please try again.';
                     errorMessage.classList.add('show');
@@ -250,7 +250,7 @@
                 if (username === 'admin' && password === 'admin123') {
                     const demoToken = 'demo-token-' + Date.now();
                     localStorage.setItem('adminToken', demoToken);
-                    window.location.href = `/brightenlighting/admin-dashboard.html#token=${demoToken}`;
+                    window.location.href = `admin-dashboard.html#token=${demoToken}`;
                 } else {
                     errorMessage.textContent = 'Invalid credentials. Please try again.';
                     errorMessage.classList.add('show');

@@ -1,0 +1,38 @@
+[
+  {
+    "id": "inq-1778166263503",
+    "name": "Automated Test",
+    "email": "automated@example.com",
+    "phone": "0712345678",
+    "subject": "Test inquiry from agent",
+    "message": "Please confirm the form and WhatsApp flow still work.",
+    "status": "new",
+    "source": "website",
+    "createdAt": "2026-05-07T15:04:23.503Z",
+    "updatedAt": "2026-05-07T15:04:23.503Z"
+  },
+  {
+    "id": "inq-1778164300103",
+    "name": "Email Check",
+    "email": "check@example.com",
+    "phone": "0712345678",
+    "subject": "Need a quote",
+    "message": "Test inquiry after email hook.",
+    "status": "new",
+    "source": "website",
+    "createdAt": "2026-05-07T14:31:40.103Z",
+    "updatedAt": "2026-05-07T14:31:40.103Z"
+  },
+  {
+    "id": "inq-1778163632135",
+    "name": "Test User",
+    "email": "test@example.com",
+    "phone": "0712345678",
+    "subject": "Lighting inquiry",
+    "message": "Please contact me about pendant lights.",
+    "status": "new",
+    "source": "website",
+    "createdAt": "2026-05-07T14:20:32.135Z",
+    "updatedAt": "2026-05-07T14:20:32.138Z"
+  }
+]

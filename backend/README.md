@@ -1,6 +1,7 @@
 # Brighten Lighting — M-Pesa STK Backend
 
 This is a minimal Node/Express backend that performs Safaricom Daraja M-Pesa STK Push requests.
+It also stores website inquiries and can send them to an email inbox when SMTP settings are configured.
 
 Requirements
 - Node.js (16+ recommended)
@@ -11,7 +12,8 @@ Setup
 
 ```bash
 cp .env.example .env
-# edit .env to set MPESA_CONSUMER_KEY, MPESA_CONSUMER_SECRET, MPESA_PASSKEY, MPESA_CALLBACK_URL
+# edit .env to set MPESA_CONSUMER_KEY, MPESA_CONSUMER_SECRET, MPESA_PASSKEY, MPESA_CALLBACK_URL,
+# and optionally INQUIRY_EMAIL_TO plus SMTP_HOST / SMTP_USER / SMTP_PASS for email notifications
 ```
 
 2. Install dependencies and start:

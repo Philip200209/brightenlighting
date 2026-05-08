@@ -8,6 +8,7 @@ const session = require('express-session');
 const mongoose = require('mongoose');
 const path = require('path');
 const fs = require('fs');
+const nodemailer = require('nodemailer');
 
 const app = express();
 const projectRoot = path.resolve(__dirname, '..');
@@ -17,6 +18,7 @@ const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 const SESSION_SECRET = process.env.SESSION_SECRET || 'brighten-store-secret';
 const MPESA_ENV = process.env.MPESA_ENV === 'production' ? 'production' : 'sandbox';
 const MONGODB_URI = process.env.MONGODB_URI;
+const INQUIRY_EMAIL_TO = process.env.INQUIRY_EMAIL_TO || process.env.ADMIN_EMAIL || process.env.CONTACT_EMAIL || '';
 
 // MongoDB Schemas
 const productSchema = new mongoose.Schema({
@@ -48,8 +50,22 @@ const orderSchema = new mongoose.Schema({
     raw: mongoose.Schema.Types.Mixed,
 });
 
+const inquirySchema = new mongoose.Schema({
+    id: { type: String, required: true, unique: true },
+    name: { type: String, required: true },
+    email: { type: String, required: true },
+    phone: { type: String, default: '' },
+    subject: { type: String, default: '' },
+    message: { type: String, required: true },
+    status: { type: String, default: 'new' },
+    source: { type: String, default: 'website' },
+    createdAt: { type: Date, default: Date.now },
+    updatedAt: { type: Date, default: Date.now },
+});
+
 const Product = mongoose.model('Product', productSchema);
 const Order = mongoose.model('Order', orderSchema);
+const Inquiry = mongoose.model('Inquiry', inquirySchema);
 
 const endpoints = {
     sandbox: {
@@ -115,6 +131,26 @@ const defaultProducts = [
     },
 ];
 
+const inquiryStoreFile = path.join(projectRoot, 'backend', 'data', 'inquiries.json');
+const productStoreFile = path.join(projectRoot, 'backend', 'data', 'products.json');
+
+const smtpConfig = process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS ? {
+    host: process.env.SMTP_HOST,
+    port: Number(process.env.SMTP_PORT || 587),
+    secure: String(process.env.SMTP_SECURE || '').toLowerCase() === 'true',
+    auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+    },
+} : null;
+
+const mailFrom = process.env.MAIL_FROM || process.env.SMTP_USER || 'Brighten Lighting <no-reply@brightenlighting.com>';
+
+function createMailer() {
+    if (!smtpConfig) return null;
+    return nodemailer.createTransport(smtpConfig);
+}
+
 // ===== UTILITY FUNCTIONS =====
 function normalizePhone(phone) {
     if (!phone) return '';
@@ -168,6 +204,223 @@ function buildOrderFromCallback(body) {
         transactionDate: getItem('TransactionDate'),
         raw: cb,
     };
+}
+
+function buildInquiry(payload) {
+    return {
+        id: `inq-${Date.now()}`,
+        name: String(payload?.name || '').trim(),
+        email: String(payload?.email || '').trim(),
+        phone: String(payload?.phone || '').trim(),
+        subject: String(payload?.subject || '').trim(),
+        message: String(payload?.message || '').trim(),
+        status: 'new',
+        source: 'website',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+    };
+}
+
+function buildProductRecord(payload, existing = {}) {
+    const now = new Date().toISOString();
+    return {
+        id: existing.id || `prod-${Date.now()}`,
+        name: String(payload?.name || existing.name || '').trim(),
+        category: String(payload?.category || existing.category || '').trim(),
+        price: Number(payload?.price ?? existing.price ?? 0),
+        image: payload?.image && String(payload.image).startsWith('data:image')
+            ? String(payload.image)
+            : String(existing.image || payload?.image || '/assets/decorative-luxury-cluster.jpg'),
+        description: String(payload?.description ?? existing.description ?? '').trim(),
+        featured: typeof payload?.featured === 'boolean' ? payload.featured : Boolean(existing.featured),
+        publicVisible: typeof payload?.publicVisible === 'boolean' ? payload.publicVisible : (existing.publicVisible !== undefined ? Boolean(existing.publicVisible) : true),
+        stock: Number(payload?.stock ?? existing.stock ?? 0),
+        createdAt: existing.createdAt || now,
+        updatedAt: now,
+    };
+}
+
+async function readInquiryFile() {
+    try {
+        const raw = await fs.promises.readFile(inquiryStoreFile, 'utf-8');
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : [];
+    } catch (error) {
+        return [];
+    }
+}
+
+async function writeInquiryFile(inquiries) {
+    await fs.promises.mkdir(path.dirname(inquiryStoreFile), { recursive: true });
+    await fs.promises.writeFile(inquiryStoreFile, JSON.stringify(inquiries, null, 2), 'utf-8');
+}
+
+async function readProductFile() {
+    try {
+        const raw = await fs.promises.readFile(productStoreFile, 'utf-8');
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : [];
+    } catch (error) {
+        return defaultProducts.map((product) => buildProductRecord(product, product));
+    }
+}
+
+async function writeProductFile(products) {
+    await fs.promises.mkdir(path.dirname(productStoreFile), { recursive: true });
+    await fs.promises.writeFile(productStoreFile, JSON.stringify(products, null, 2), 'utf-8');
+}
+
+async function listProducts({ admin = false } = {}) {
+    if (MONGODB_URI && mongoose.connection.readyState === 1) {
+        const query = admin ? {} : { publicVisible: true, stock: { $gt: 0 } };
+        const sort = admin ? { createdAt: -1 } : { featured: -1, name: 1 };
+        return Product.find(query).sort(sort).lean();
+    }
+
+    const products = await readProductFile();
+    const filtered = admin
+        ? products
+        : products.filter((product) => (product.publicVisible !== false) && Number(product.stock || 0) > 0);
+
+    return filtered.sort(admin
+        ? (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        : (a, b) => Number(Boolean(b.featured)) - Number(Boolean(a.featured)) || String(a.name || '').localeCompare(String(b.name || ''))
+    );
+}
+
+async function getProductRecord(id) {
+    if (MONGODB_URI && mongoose.connection.readyState === 1) {
+        return Product.findById(id).lean();
+    }
+
+    const products = await readProductFile();
+    return products.find((product) => product.id === id) || null;
+}
+
+async function saveProductRecord(payload) {
+    if (MONGODB_URI && mongoose.connection.readyState === 1) {
+        const product = new Product(payload);
+        await product.save();
+        return product;
+    }
+
+    const products = await readProductFile();
+    const product = buildProductRecord(payload);
+    products.unshift(product);
+    await writeProductFile(products);
+    return product;
+}
+
+async function updateProductRecord(id, payload) {
+    if (MONGODB_URI && mongoose.connection.readyState === 1) {
+        const product = await Product.findById(id);
+        if (!product) return null;
+
+        if (payload.name !== undefined) product.name = payload.name;
+        if (payload.category !== undefined) product.category = payload.category;
+        if (payload.price !== undefined) product.price = Number(payload.price);
+        if (payload.stock !== undefined) product.stock = Number(payload.stock);
+        if (payload.description !== undefined) product.description = payload.description;
+        if (payload.image && String(payload.image).startsWith('data:image')) product.image = payload.image;
+        if (typeof payload.featured === 'boolean') product.featured = payload.featured;
+        if (typeof payload.publicVisible === 'boolean') product.publicVisible = payload.publicVisible;
+
+        product.updatedAt = new Date();
+        await product.save();
+        return product;
+    }
+
+    const products = await readProductFile();
+    const index = products.findIndex((product) => product.id === id);
+    if (index === -1) return null;
+
+    products[index] = buildProductRecord(payload, products[index]);
+    await writeProductFile(products);
+    return products[index];
+}
+
+async function deleteProductRecord(id) {
+    if (MONGODB_URI && mongoose.connection.readyState === 1) {
+        return Product.findByIdAndDelete(id);
+    }
+
+    const products = await readProductFile();
+    const index = products.findIndex((product) => product.id === id);
+    if (index === -1) return null;
+
+    const [removed] = products.splice(index, 1);
+    await writeProductFile(products);
+    return removed;
+}
+
+async function listInquiries() {
+    if (MONGODB_URI && mongoose.connection.readyState === 1) {
+        return Inquiry.find().sort({ createdAt: -1 }).lean();
+    }
+
+    return (await readInquiryFile()).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+}
+
+async function saveInquiry(payload) {
+    const inquiry = buildInquiry(payload);
+
+    if (MONGODB_URI && mongoose.connection.readyState === 1) {
+        return Inquiry.create(inquiry);
+    }
+
+    const inquiries = await readInquiryFile();
+    inquiries.unshift(inquiry);
+    await writeInquiryFile(inquiries);
+    return inquiry;
+}
+
+async function notifyInquiryByEmail(inquiry) {
+    if (!INQUIRY_EMAIL_TO || !smtpConfig) {
+        return { skipped: true };
+    }
+
+    const transporter = createMailer();
+    if (!transporter) {
+        return { skipped: true };
+    }
+
+    await transporter.sendMail({
+        from: mailFrom,
+        to: INQUIRY_EMAIL_TO,
+        subject: `New Brighten Lighting inquiry: ${inquiry.subject || inquiry.name}`,
+        text: [
+            `Name: ${inquiry.name}`,
+            `Email: ${inquiry.email}`,
+            `Phone: ${inquiry.phone || '-'}`,
+            `Subject: ${inquiry.subject || '-'}`,
+            '',
+            inquiry.message,
+        ].join('\n'),
+    });
+
+    return { skipped: false };
+}
+
+async function updateInquiryStatus(id, status) {
+    if (MONGODB_URI && mongoose.connection.readyState === 1) {
+        return Inquiry.findOneAndUpdate(
+            { id },
+            { status, updatedAt: new Date() },
+            { new: true }
+        ).lean();
+    }
+
+    const inquiries = await readInquiryFile();
+    const index = inquiries.findIndex((item) => item.id === id);
+    if (index === -1) return null;
+
+    inquiries[index] = {
+        ...inquiries[index],
+        status,
+        updatedAt: new Date().toISOString(),
+    };
+    await writeInquiryFile(inquiries);
+    return inquiries[index];
 }
 
 // ===== MIDDLEWARE =====
@@ -250,9 +503,7 @@ app.get('/', async (req, res, next) => {
 // ===== PUBLIC API =====
 app.get('/api/products', async (req, res, next) => {
     try {
-        const products = await Product.find({ publicVisible: true, stock: { $gt: 0 } })
-            .sort({ featured: -1, name: 1 })
-            .lean();
+        const products = await listProducts();
         return res.json(products);
     } catch (error) {
         return next(error);
@@ -263,7 +514,7 @@ app.get('/api/products', async (req, res, next) => {
 // Get all products (admin - no filters)
 app.get('/api/products/admin/all', async (req, res, next) => {
     try {
-        const products = await Product.find().sort({ createdAt: -1 }).lean();
+        const products = await listProducts({ admin: true });
         return res.json(products);
     } catch (error) {
         return next(error);
@@ -273,7 +524,7 @@ app.get('/api/products/admin/all', async (req, res, next) => {
 // Get single product by ID
 app.get('/api/products/:id', async (req, res, next) => {
     try {
-        const product = await Product.findById(req.params.id).lean();
+        const product = await getProductRecord(req.params.id);
         if (!product) return res.status(404).json({ error: 'Product not found' });
         return res.json(product);
     } catch (error) {
@@ -281,33 +532,79 @@ app.get('/api/products/:id', async (req, res, next) => {
     }
 });
 
+
+// ===== INQUIRIES API =====
+app.get('/api/inquiries', async (req, res, next) => {
+    try {
+        const inquiries = await listInquiries();
+        return res.json(inquiries);
+    } catch (error) {
+        return next(error);
+    }
+});
+
+app.post('/api/inquiries', async (req, res, next) => {
+    try {
+        const name = String(req.body?.name || '').trim();
+        const email = String(req.body?.email || '').trim();
+        const message = String(req.body?.message || '').trim();
+
+        if (!name || !email || !message) {
+            return res.status(400).json({ error: 'Name, email, and message are required' });
+        }
+
+        const inquiry = await saveInquiry(req.body);
+        let emailResult = { skipped: true };
+
+        try {
+            emailResult = await notifyInquiryByEmail(inquiry);
+        } catch (mailError) {
+            console.error('Inquiry email delivery failed:', mailError.message);
+        }
+
+        return res.status(201).json({ ok: true, inquiry, emailSent: !emailResult.skipped });
+    } catch (error) {
+        return next(error);
+    }
+});
+
+app.put('/api/inquiries/:id/status', async (req, res, next) => {
+    try {
+        const status = String(req.body?.status || '').trim().toLowerCase();
+        if (!status) {
+            return res.status(400).json({ error: 'Status is required' });
+        }
+
+        const inquiry = await updateInquiryStatus(req.params.id, status);
+        if (!inquiry) {
+            return res.status(404).json({ error: 'Inquiry not found' });
+        }
+
+        return res.json({ ok: true, inquiry });
+    } catch (error) {
+        return next(error);
+    }
+});
 // Create new product (admin)
 app.post('/api/products', async (req, res, next) => {
     try {
-        const { name, category, price, stock, description } = req.body;
+        const { name, category, price, stock, description, image, featured, publicVisible } = req.body;
         
         if (!name || !category || price === undefined || stock === undefined) {
             return res.status(400).json({ error: 'Missing required fields' });
         }
 
-        let imageData = '';
-        if (req.body.image && req.body.image.startsWith('data:image')) {
-            imageData = req.body.image;
-        }
-
-        const product = new Product({
-            id: `prod-${Date.now()}`,
+        const product = await saveProductRecord({
             name,
             category,
             price: Number(price),
             stock: Number(stock),
             description: description || '',
-            image: imageData || '/assets/decorative-luxury-cluster.jpg',
-            featured: false,
-            publicVisible: true
+            image,
+            featured,
+            publicVisible,
         });
 
-        await product.save();
         return res.status(201).json(product);
     } catch (error) {
         return next(error);
@@ -317,20 +614,8 @@ app.post('/api/products', async (req, res, next) => {
 // Update product
 app.put('/api/products/:id', async (req, res, next) => {
     try {
-        const { name, category, price, stock, description, image } = req.body;
-        const product = await Product.findById(req.params.id);
-
+        const product = await updateProductRecord(req.params.id, req.body);
         if (!product) return res.status(404).json({ error: 'Product not found' });
-
-        if (name) product.name = name;
-        if (category) product.category = category;
-        if (price !== undefined) product.price = Number(price);
-        if (stock !== undefined) product.stock = Number(stock);
-        if (description !== undefined) product.description = description;
-        if (image && image.startsWith('data:image')) product.image = image;
-
-        product.updatedAt = new Date();
-        await product.save();
 
         return res.json(product);
     } catch (error) {
@@ -341,7 +626,7 @@ app.put('/api/products/:id', async (req, res, next) => {
 // Delete product
 app.delete('/api/products/:id', async (req, res, next) => {
     try {
-        const result = await Product.findByIdAndDelete(req.params.id);
+        const result = await deleteProductRecord(req.params.id);
         if (!result) return res.status(404).json({ error: 'Product not found' });
         return res.json({ deleted: true });
     } catch (error) {

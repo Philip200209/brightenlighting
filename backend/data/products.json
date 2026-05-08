@@ -1,5 +1,18 @@
 [
   {
+    "id": "prod-1778167550367",
+    "name": "Test Pendant",
+    "category": "pendant",
+    "price": 9999,
+    "image": "/assets/decorative-luxury-cluster.jpg",
+    "description": "Temporary test product from agent.",
+    "featured": false,
+    "publicVisible": true,
+    "stock": 12,
+    "createdAt": "2026-05-07T15:25:50.366Z",
+    "updatedAt": "2026-05-07T15:25:50.366Z"
+  },
+  {
     "id": "prod-99b85574-2657-4bb6-9f34-6d8819886fc8",
     "name": "outdoor",
     "category": "outdoor",
