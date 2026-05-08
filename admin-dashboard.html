@@ -158,7 +158,6 @@
             th, td { padding: 6px; }
             .menu-item { font-size: 0.7rem; padding: 10px 8px; }
         }
-        }
     </style>
 </head>
 <body>
@@ -222,7 +221,7 @@
             <!-- DASHBOARD PAGE -->
             <div id="page-dashboard" class="page-content active">
                 <div class="mb-8">
-                    <h1 class="text-4xl font-bold mb-2">Welcome back, Lime! 👋</h1>
+                    <h1 class="text-4xl font-bold mb-2">Welcome back, Lime </h1>
                     <p class="text-gray-400">Here's your business snapshot for today</p>
                 </div>
 
@@ -562,13 +561,18 @@
         }
 
         // ===== UTILITY FUNCTIONS =====
-        function fileToBase64(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = reject;
-                reader.readAsDataURL(file);
-            });
+        async function fileToBase64(file) {
+            const buffer = await file.arrayBuffer();
+            const bytes = new Uint8Array(buffer);
+            let binary = '';
+            const chunkSize = 0x8000;
+
+            for (let i = 0; i < bytes.length; i += chunkSize) {
+                const chunk = bytes.subarray(i, i + chunkSize);
+                binary += String.fromCharCode.apply(null, chunk);
+            }
+
+            return `data:${file.type || 'application/octet-stream'};base64,${btoa(binary)}`;
         }
 
         // ===== API HELPERS =====
@@ -834,13 +838,18 @@
 
         // ===== IMAGE HANDLING =====
         function handleImageSelect(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    document.getElementById('imagePreview').innerHTML = `<img src="${e.target.result}" alt="preview" class="image-preview">`;
-                };
-                reader.readAsDataURL(file);
+            const file = event.target.files && event.target.files[0];
+            if (!file) return;
+
+            const previewUrl = URL.createObjectURL(file);
+            const preview = document.getElementById('imagePreview');
+            preview.innerHTML = `<img src="${previewUrl}" alt="preview" class="image-preview">`;
+
+            const previewImage = preview.querySelector('img');
+            if (previewImage) {
+                previewImage.onload = () => URL.revokeObjectURL(previewUrl);
+            } else {
+                URL.revokeObjectURL(previewUrl);
             }
         }
 
