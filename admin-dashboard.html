@@ -777,12 +777,24 @@
                 }
 
                 if (fileInput.files.length > 0) {
+                    const file = fileInput.files[0];
+                    // basic client-side validation
+                    const maxSize = 8 * 1024 * 1024; // 8MB
+                    if (!file.type.startsWith('image/')) {
+                        showAlert('productFormAlert', 'Selected file is not an image', 'error');
+                        return;
+                    }
+                    if (file.size > maxSize) {
+                        showAlert('productFormAlert', 'Image is too large (max 8 MB)', 'error');
+                        return;
+                    }
+
                     try {
-                        const file = fileInput.files[0];
+                        console.log('Reading image file', file.name, file.type, file.size);
                         data.image = await fileToBase64(file);
                     } catch (readErr) {
-                        console.error('Failed to read image file', readErr);
-                        showAlert('productFormAlert', 'Failed to read image file', 'error');
+                        console.error('Failed to read image file', readErr, file);
+                        showAlert('productFormAlert', 'Failed to read image file: ' + (readErr?.message || readErr), 'error');
                         return;
                     }
                 }
