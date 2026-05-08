@@ -425,7 +425,24 @@ async function updateInquiryStatus(id, status) {
 
 // ===== MIDDLEWARE =====
 app.use(cors({
-    origin: '*',
+    origin: function(origin, callback) {
+        // Allow local development URLs and production URLs
+        const allowedOrigins = [
+            'http://localhost:3000',
+            'http://localhost:5500',
+            'http://127.0.0.1:5500',
+            'http://127.0.0.1:3000',
+            'http://localhost:3001',
+            'http://127.0.0.1:3001',
+            'https://philip200209.github.io',
+            'https://brighten-lighting-api.onrender.com'
+        ];
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],

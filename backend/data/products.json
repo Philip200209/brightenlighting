@@ -1,5 +1,18 @@
 [
   {
+    "id": "prod-1778221060684",
+    "name": "Crystal Chandelier",
+    "category": "decorative",
+    "price": 15000,
+    "image": "/assets/decorative-luxury-cluster.jpg",
+    "description": "Elegant crystal chandelier with warm incandescent light, perfect for dining rooms and entryways",
+    "featured": false,
+    "publicVisible": true,
+    "stock": 5,
+    "createdAt": "2026-05-08T06:17:40.684Z",
+    "updatedAt": "2026-05-08T06:17:40.684Z"
+  },
+  {
     "id": "prod-1778167550367",
     "name": "Test Pendant",
     "category": "pendant",

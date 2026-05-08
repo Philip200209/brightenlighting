@@ -548,20 +548,7 @@
             observer.observe(element);
         });
 
-        const products = [
-            {
-                title: 'Decorative Cluster Pendant',
-                description: 'Modern statement decorative pendant cluster',
-                price: 'KSh 5,500',
-                image: 'https://philip200209.github.io/assets/decorative-luxury-cluster.jpg'
-            },
-            {
-                title: 'Luxury Chandeliers',
-                description: 'Aluminum, Metal, and Premium Acrylic. Color Temp: 3000K / 4000K / 6000K (Switchable). Dimensions: Adjustable drop up to 1.5 meters.',
-                price: 'KSh 5,500',
-                image: 'https://philip200209.github.io/assets/luxury-chandeliers.jpg'
-            }
-        ];
+        let products = [];
 
         function escapeHtml(value) {
             return String(value).replace(/[&<>"']/g, (character) => ({
@@ -575,17 +562,19 @@
 
         function renderProducts(items) {
             const grid = document.getElementById('productsGrid');
+            if (!grid) return;
+            
             grid.innerHTML = items.map((product) => `
                 <article class="product-card panel reveal show">
                     <div class="product-image">
-                        <img src="${product.image}" alt="${product.title}" class="h-full w-full object-cover" loading="lazy">
+                        <img src="${product.image || 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22%3E%3Crect fill=%22%23F59E0B%22 width=%22200%22 height=%22200%22/%3E%3C/svg%3E'}" alt="${product.name || product.title}" class="h-full w-full object-cover" loading="lazy">
                     </div>
                     <div class="p-5 md:p-6">
-                        <h3 class="text-xl font-black">${escapeHtml(product.title)}</h3>
-                        <p class="mt-3 text-sm text-gray-400 leading-6">${escapeHtml(product.description)}</p>
+                        <h3 class="text-xl font-black">${escapeHtml(product.name || product.title)}</h3>
+                        <p class="mt-3 text-sm text-gray-400 leading-6">${escapeHtml(product.description || 'Premium lighting solution')}</p>
                         <div class="mt-5 flex items-center justify-between gap-4">
-                            <span class="text-lg font-bold gold-text">${escapeHtml(product.price)}</span>
-                            <button type="button" class="btn-gold touch-48 inquire-btn" data-product-title="${escapeHtml(product.title)}" data-product-description="${escapeHtml(product.description)}">Inquire</button>
+                            <span class="text-lg font-bold gold-text">KSh ${escapeHtml(String(product.price || 0).replace(/[^\d]/g, ''))}</span>
+                            <button type="button" class="btn-gold touch-48 inquire-btn" data-product-title="${escapeHtml(product.name || product.title)}" data-product-description="${escapeHtml(product.description || '')}">Inquire</button>
                         </div>
                     </div>
                 </article>
@@ -633,7 +622,50 @@
             });
         }
 
-        renderProducts(products);
+        // Fetch products from API
+        async function loadProductsFromAPI() {
+            try {
+                const apiUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+                    ? 'http://localhost:3000/api/products'
+                    : 'https://brighten-lighting-api.onrender.com/api/products';
+                
+                const response = await fetch(apiUrl);
+                if (response.ok) {
+                    products = await response.json();
+                    renderProducts(products);
+                } else {
+                    console.warn('Failed to fetch products from API, showing fallback products');
+                    products = [
+                        {
+                            name: 'Decorative Cluster Pendant',
+                            description: 'Modern statement decorative pendant cluster',
+                            price: 5500,
+                            image: 'https://philip200209.github.io/assets/decorative-luxury-cluster.jpg'
+                        },
+                        {
+                            name: 'Luxury Chandeliers',
+                            description: 'Aluminum, Metal, and Premium Acrylic. Color Temp: 3000K / 4000K / 6000K',
+                            price: 5500,
+                            image: 'https://philip200209.github.io/assets/luxury-chandeliers.jpg'
+                        }
+                    ];
+                    renderProducts(products);
+                }
+            } catch (error) {
+                console.error('Error loading products:', error);
+                products = [
+                    {
+                        name: 'Decorative Cluster Pendant',
+                        description: 'Modern statement decorative pendant cluster',
+                        price: 5500,
+                        image: 'https://philip200209.github.io/assets/decorative-luxury-cluster.jpg'
+                    }
+                ];
+                renderProducts(products);
+            }
+        }
+
+        loadProductsFromAPI();
 
         contactForm.addEventListener('submit', async (event) => {
             event.preventDefault();
