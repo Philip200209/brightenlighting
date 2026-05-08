@@ -77,6 +77,34 @@
         .form-label { display: block; margin-bottom: 8px; font-weight: 500; }
         .form-control { width: 100%; padding: 10px; border-radius: 6px; font-size: 16px; }
 
+        /* High-contrast inputs: white fields with dark text and visible placeholders */
+        .input-field,
+        .form-control,
+        input[type="text"],
+        input[type="number"],
+        input[type="email"],
+        input[type="search"],
+        textarea,
+        select {
+            background-color: #ffffff;
+            color: #1A1A1A !important;
+            border: 1px solid var(--border);
+        }
+
+        /* Placeholder colors (ensure visible on white background) */
+
+        .input-field::placeholder,
+        .form-control::placeholder,
+        input::placeholder,
+        textarea::placeholder {
+            color: #6b7280 !important;
+            opacity: 1;
+        }
+
+        /* Vendor-specific placeholder overrides */
+        input::-webkit-input-placeholder, textarea::-webkit-input-placeholder { color: #6b7280; }
+        input:-ms-input-placeholder, textarea:-ms-input-placeholder { color: #6b7280; }
+
         .upload-area { border: 2px dashed var(--gold); border-radius: 8px; padding: 30px; text-align: center; cursor: pointer; transition: all 0.2s; }
         .upload-area:hover { background-color: rgba(245, 158, 11, 0.05); }
         .upload-area.dragover { background-color: rgba(245, 158, 11, 0.1); border-color: #F59E0Bdd; }
@@ -546,22 +574,41 @@
             const options = {
                 method,
                 headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
+                    'Authorization': `Bearer ${token}`
                 }
             };
 
             if (data) {
+                options.headers['Content-Type'] = 'application/json';
                 options.body = JSON.stringify(data);
             }
 
             try {
                 const response = await fetch(`${API_BASE}${endpoint}`, options);
-                if (!response.ok) {
-                    const error = await response.json();
-                    throw new Error(error.error || `HTTP ${response.status}`);
+
+                // Try to parse JSON body when possible, but fall back to text for non-JSON responses
+                const contentType = response.headers.get('content-type') || '';
+                let body = null;
+                if (contentType.includes('application/json')) {
+                    body = await response.json();
+                } else {
+                    // Attempt to read text (may be HTML error page)
+                    try {
+                        body = await response.text();
+                    } catch (e) {
+                        body = null;
+                    }
                 }
-                return await response.json();
+
+                if (!response.ok) {
+                    const message = (body && typeof body === 'object') ? (body.error || JSON.stringify(body)) : (body || `HTTP ${response.status}`);
+                    const err = new Error(message);
+                    err.status = response.status;
+                    err.body = body;
+                    throw err;
+                }
+
+                return body;
             } catch (error) {
                 console.error('API Error:', error);
                 throw error;
@@ -700,8 +747,8 @@
             const stock = parseInt(document.getElementById('productStock').value);
             const description = document.getElementById('productDescription').value.trim();
 
-            if (!name || !price || stock < 0) {
-                showAlert('productFormAlert', 'Please fill all required fields', 'error');
+            if (!name || Number.isNaN(price) || Number.isNaN(stock) || stock < 0) {
+                showAlert('productFormAlert', 'Please fill all required fields (valid price and stock)', 'error');
                 return;
             }
 
@@ -716,10 +763,23 @@
                     description
                 };
 
+                console.log('Saving product payload:', data);
+
                 const fileInput = document.getElementById('productImage');
+                if (!currentEditingProductId && fileInput.files.length === 0) {
+                    showAlert('productFormAlert', 'Please select an image for the product', 'error');
+                    return;
+                }
+
                 if (fileInput.files.length > 0) {
-                    const file = fileInput.files[0];
-                    data.image = await fileToBase64(file);
+                    try {
+                        const file = fileInput.files[0];
+                        data.image = await fileToBase64(file);
+                    } catch (readErr) {
+                        console.error('Failed to read image file', readErr);
+                        showAlert('productFormAlert', 'Failed to read image file', 'error');
+                        return;
+                    }
                 }
 
                 if (currentEditingProductId) {
@@ -734,7 +794,10 @@
                 await loadDashboardProducts();
                 setTimeout(() => closeModal('productModal'), 1500);
             } catch (error) {
-                showAlert('productFormAlert', 'Failed to save product: ' + error.message, 'error');
+                console.error('Save product error:', error, 'status=', error?.status, 'body=', error?.body);
+                const bodyMsg = error?.body && typeof error.body === 'string' ? error.body : (error?.body && typeof error.body === 'object' ? JSON.stringify(error.body) : null);
+                const display = bodyMsg || error?.message || String(error);
+                showAlert('productFormAlert', 'Failed to save product: ' + display, 'error');
             } finally {
                 document.getElementById('saveProductBtn').disabled = false;
             }

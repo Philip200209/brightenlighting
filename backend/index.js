@@ -448,8 +448,8 @@ app.use(cors({
     allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
-app.use(express.json({ limit: '1mb' }));
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(session({
     secret: SESSION_SECRET,
     resave: false,
@@ -605,6 +605,18 @@ app.put('/api/inquiries/:id/status', async (req, res, next) => {
 // Create new product (admin)
 app.post('/api/products', async (req, res, next) => {
     try {
+        // Log request size and a preview of the image field for debugging
+        try {
+            const contentLength = req.headers['content-length'] || 'unknown';
+            console.log(`POST /api/products - content-length: ${contentLength}`);
+            if (req.body && req.body.image) {
+                const imgPreview = String(req.body.image).slice(0, 200);
+                console.log(`POST /api/products - image preview: ${imgPreview}...`);
+            }
+        } catch (logErr) {
+            console.error('Error logging product request info', logErr);
+        }
+
         const { name, category, price, stock, description, image, featured, publicVisible } = req.body;
         
         if (!name || !category || price === undefined || stock === undefined) {
@@ -737,11 +749,14 @@ app.get('/api/gallery', async (req, res, next) => {
 
 // ===== ERROR HANDLER =====
 app.use((error, req, res, next) => {
-    console.error(error);
+    console.error('Express error handler:', error);
     if (res.headersSent) {
         return next(error);
     }
-    return res.status(500).json({ error: 'Server error', detail: error.message });
+    const status = error.status || error.statusCode || 500;
+    const message = error.message || 'Internal Server Error';
+    const detail = error.body || error.stack || null;
+    return res.status(status).json({ error: message, detail });
 });
 
 // ===== START SERVER =====
