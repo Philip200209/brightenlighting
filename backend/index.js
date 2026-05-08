@@ -22,7 +22,7 @@ const EXTRA_CORS_ORIGINS = String(process.env.CORS_ORIGINS || '')
 const SESSION_SECRET = process.env.SESSION_SECRET || 'brighten-store-secret';
 const MPESA_ENV = process.env.MPESA_ENV === 'production' ? 'production' : 'sandbox';
 const MONGODB_URI = process.env.MONGODB_URI;
-const INQUIRY_EMAIL_TO = process.env.INQUIRY_EMAIL_TO || process.env.ADMIN_EMAIL || process.env.CONTACT_EMAIL || '';
+const INQUIRY_EMAIL_TO = process.env.INQUIRY_EMAIL_TO || process.env.ADMIN_EMAIL || process.env.CONTACT_EMAIL || 'Info@brighteninglighting.co.ke';
 
 // MongoDB Schemas
 const productSchema = new mongoose.Schema({
