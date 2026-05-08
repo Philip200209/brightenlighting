@@ -15,6 +15,10 @@ const projectRoot = path.resolve(__dirname, '..');
 
 const PORT = process.env.PORT || 3000;
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
+const EXTRA_CORS_ORIGINS = String(process.env.CORS_ORIGINS || '')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
 const SESSION_SECRET = process.env.SESSION_SECRET || 'brighten-store-secret';
 const MPESA_ENV = process.env.MPESA_ENV === 'production' ? 'production' : 'sandbox';
 const MONGODB_URI = process.env.MONGODB_URI;
@@ -426,7 +430,7 @@ async function updateInquiryStatus(id, status) {
 // ===== MIDDLEWARE =====
 app.use(cors({
     origin: function(origin, callback) {
-        // Allow local development URLs and production URLs
+        // Allow local development URLs, the configured frontend, and any explicit overrides.
         const allowedOrigins = [
             'http://localhost:3000',
             'http://localhost:5500',
@@ -434,8 +438,12 @@ app.use(cors({
             'http://127.0.0.1:3000',
             'http://localhost:3001',
             'http://127.0.0.1:3001',
+            'http://192.168.100.2:5500',
+            'http://192.168.137.1:5500',
             'https://philip200209.github.io',
-            'https://brighten-lighting-api.onrender.com'
+            'https://brighten-lighting-api.onrender.com',
+            FRONTEND_URL,
+            ...EXTRA_CORS_ORIGINS,
         ];
         if (!origin || allowedOrigins.includes(origin)) {
             callback(null, true);
@@ -779,6 +787,7 @@ const start = async () => {
             }
         } else {
             console.log('⚠️  MONGODB_URI not set - running in demo mode (no data persistence)');
+            console.log('ℹ️  Add MongoDB Atlas to keep products and inquiries persistent across restarts');
         }
 
         app.listen(PORT, '0.0.0.0', () => {
